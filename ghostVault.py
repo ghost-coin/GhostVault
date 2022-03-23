@@ -388,6 +388,10 @@ def startDaemon():
     else:
         subprocess.call([f"{daemonInfo()['ghostdPath']}"])
         waitForDaemon()
+        try:
+            loadWallet(daemonInfo()['walletName'])
+        except:
+            pass
     
 def stopDaemon():
     
