@@ -302,9 +302,9 @@ def extractDaemon():
     try:
         shutil.unpack_archive(archive, os.getcwd(), archiveFormat)
     except Exception as e:
-        #showError(e)
-        time.sleep(5)
-        shutil.unpack_archive(archive, os.getcwd(), archiveFormat)
+        showError(e)
+        #time.sleep(5)
+        #shutil.unpack_archive(archive, os.getcwd(), archiveFormat)
     for dirpath, dirnames, filenames in os.walk("."):
         for filename in [f for f in filenames if f == "ghostd"]:
             daemonPath = os.path.join(dirpath, filename)
