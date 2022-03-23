@@ -2,5 +2,5 @@
     "hash": "aba235d2c6f8175dec3123d346f4f3ad4f77d7b8249bab3ee9442c406b3f8b40"},
     "arm-Linux": {"link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.9/ghost-0.21.1.9-arm-linux-gnueabihf.tar.gz",
         "hash": "8a51a92e1131128add348200158996c75df0635ad2040ed19d7470ebb78ae783"},
-    "version": "0.21.1.9"
+    "version": "0.21.1.10"
     }
