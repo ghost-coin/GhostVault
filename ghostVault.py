@@ -669,6 +669,8 @@ def isUpToDate():
 
 def status():
     clear()
+    repo = git.Repo(os.path.expanduser("~/GhostVault"))
+    repo.remotes.origin.pull()
     
     print(f"{Fore.BLUE}#{Fore.WHITE}"*80 + "\n")
 
