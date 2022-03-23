@@ -277,7 +277,7 @@ def downloadDaemon():
         downloadFromUrl(url, archive)
 
 def extractDaemon():
-    #removeDaemon()
+    removeDaemon()
     archive = getLink().split("/")[-1]
 
     if os.path.isfile(archive) == False:
