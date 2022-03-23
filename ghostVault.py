@@ -443,6 +443,10 @@ def quickstart():
     extractDaemon()
     prepareDataDir()
     startDaemon()
+    try:
+        loadWallet(daemonInfo()['walletName'])
+    except:
+        pass
     
     
     if isSyncing() == True:
