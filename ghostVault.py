@@ -886,6 +886,8 @@ def main():
                 print(f"Your extended public key is:\n\n{Fore.CYAN}{key}{Fore.WHITE}")
         
         elif arg == "update":
+            repo = git.Repo(os.path.expanduser("~/GhostVault"))
+            repo.remotes.origin.pull()
             
             print(f"Checking if ghostd is up to date...")
             if checkConnect() == False:
