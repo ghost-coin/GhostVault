@@ -780,7 +780,7 @@ def status():
             print(f"ghostd staking currently?       : {Fore.RED}NO{Fore.WHITE}")
         
         elif getStakingInfo()['staking'] == False and getStakingInfo()['enabled'] == True:
-            print(f"ghostd staking currently?       : {Fore.RED}NO - {getStakingInfo()['cause'] if getStakingInfo()['cause'] else ''}{Fore.WHITE}")
+            print(f"ghostd staking currently?       : {Fore.RED}NO - {getStakingInfo()['cause'] if 'cause' in getStakingInfo() else ''}{Fore.WHITE}")
         
         else:
             print(f"ghostd staking currently?       : {Fore.GREEN}YES{Fore.WHITE}")
