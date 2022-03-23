@@ -915,6 +915,7 @@ def main():
             print("Forcing resync...")
             stopDaemon()
             clearBlocks()
+            time.sleep(5)
             startDaemon()
             if isSyncing() == True:
                 syncProgress()
