@@ -599,6 +599,7 @@ def quickstart():
                 break
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
+    print(f"Quick start success!")
 
 def makeExtKey():
     while True:
@@ -614,7 +615,7 @@ def makeExtKey():
     dInfo['extPubKey'] = extKey
     dInfo['extPubKeyLabel'] = keyLabel
     updateDaemonInfo(dInfo)
-    input(f"Your extPublicKey is:/n{Fore.GREEN}{extKey}{Fore.WHITE}\nPress Enter to continue...")    
+    input(f"Your extPublicKey is:\n{Fore.GREEN}{extKey}{Fore.WHITE}\nPress Enter to continue...")    
 
 def makeWallet():
     while True:
