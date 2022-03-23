@@ -409,6 +409,7 @@ def removeDaemon():
     elif os.path.isdir(daemonInfo()['ghostdPath'][1:]) == False:
         return
     daemonDir = f"{daemonInfo()['ghostdPath'].split('/')[1]}/"
+    stopDaemon()
     print('Removing deamon directory.')
     shutil.rmtree(daemonDir)
     dInfo = daemonInfo()
