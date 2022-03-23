@@ -1,0 +1,5 @@
+python-bitcoinrpc
+requests
+colorama
+GitPython
+psutil
