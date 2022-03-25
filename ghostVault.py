@@ -767,7 +767,7 @@ def private():
             
             if ans == "private":
                 privateSetup()
-            elif ans = "":
+            elif ans == "":
                 break
             else:
                 print(f"Invalid answer")
