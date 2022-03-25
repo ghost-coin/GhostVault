@@ -8,13 +8,14 @@ import hashlib
 from datetime import datetime, timedelta
 from colorama import Fore, Back, Style
 from colorama import init
+from crontab import CronTab
 init()
 
 RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v0.2"
+version = "v0.3"
 
 def rpcproxy():
     rpcproxy = AuthServiceProxy('http://%s:%s@127.0.0.1:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT))
@@ -75,6 +76,10 @@ def importKey(words):
 def getNewExtAddr(label):
     extAddr = rpcproxy().getnewextaddress(label)
     return extAddr
+    
+def getNewAddr():
+    addr = rpcproxy().getnewddress("", False, False, False, "legacy")
+    return addr
 
 def validateAddress(address):
     addr = rpcproxy().validateaddress(address)
@@ -107,6 +112,9 @@ def getNetworkInfo():
     network = rpcproxy().getnetworkinfo()
     return network
 
+def getBalances():
+    return rpcproxy().getbalances()
+
 def getKeysAvailable():
     keys = []
     
@@ -138,6 +146,18 @@ def setRewardAddress(rewardAddress):
     updateDaemonInfo(dInfo)
     print(f"Reward address successfully updated.")
 
+def setAnonAddress(rewardAddress):
+    
+    if validateAddress(rewardAddress) == False:
+        showError(f"Invalid Ghost address: {rewardAddress}")
+        
+    print(f"Setting reward address to: {rewardAddress}...")
+
+    dInfo = daemonInfo()
+    dInfo['anonRewardAddress'] = rewardAddress
+    updateDaemonInfo(dInfo)
+    print(f"Anon reward address successfully updated.")
+
 def getRewardAddressFromWallet():
     walletInfo = rpcproxy().walletsettings("stakingoptions")
     
@@ -165,6 +185,14 @@ def createWallet(walletName):
     rpcproxy().createwallet(walletName)
 
 def loadWallet(walletName):
+    if checkWalletLoad() == True:
+        wallet = rpcproxy.getwalletinfo()['walletname']
+        if wallet == walletName:
+            print("Wallet {walletName} already loaded.")
+            return
+        else:
+            rpcproxy().loadwallet(walletName)
+            return
     rpcproxy().loadwallet(walletName)
 
 def ImportWords(words):
@@ -432,6 +460,34 @@ def removeArchive():
     else:
         print('Archive file not found.')
 
+def getStats(duration="all", days=None):
+    tnow = time.time()
+    day = 86400
+    
+    if checkWalletLoad() == False:
+        try:
+            loadWallet(daemonInfo()['walletName'])
+        except:
+            showError(f"Now wallet loaded!")
+    
+    if duration == 'all' and days == None:
+        last24 = tnow - day
+        last7d = tnow - day *7
+        last30d = tnow - day *30
+        last180d = tnow - day *180
+        last365d = tnow - day *365
+        durations = [("24h", last24), ("7 Days", last7d), ("30 Days", last30d), ("180 Days", last180d), ("Year", last365d)]
+        clear()
+        
+        print(f"GhostVault {version} Staking Stats Page\n\n")
+        
+        print(f"{Fore.BLUE}DURATION        STAKES FOUND        AMOUNT EARNED{Style.RESET_ALL}")
+        
+        for i in durations:
+            filter = rpcproxy().filtertransactions({"from":f"{int(i[1])}", "to":f"{int(tnow)}","count":100000,"category":"stake","collate":True,"include_watchonly":True,"with_reward":True})
+
+            print(f"Last {i[0]:<9}        {Fore.GREEN}{filter['collated']['records']}                 {filter['collated']['total_reward']}{Style.RESET_ALL}")
+
 def quickstart():
     newWallet = True
     clear()
@@ -440,6 +496,9 @@ def quickstart():
     print(f"This guide will also try to detect existing wallets and settings.")
     print(f"To start with, we will download the daemon and get synced with the Ghost network.")
     input("Press Enter to continue...")
+    
+    if checkConnect() == True:
+        stopDaemon()
     
     downloadDaemon()
     extractDaemon()
@@ -481,9 +540,30 @@ def quickstart():
     clear()
     
     if len(getWallets()) == 0:
-        print("No existing wallets detected.\nMaking new...")
+        print(f"No existing wallets detected.")
+        print(f"Sometimes GhostVault will not find a wallet that is existing.\nYou can enter the wallet name and GhostVault will try to load it.\n")
         
-        makeWallet()
+        walletName = input(f"Please enter a wallet name or leave blank to make new: ")
+        
+        if walletName != "":
+            print(f"Attempting to load wallet: {walletName}")
+            
+            try:
+                rpcproxy().loadwallet(walletName)
+            except:
+                showError(f"Failed to load wallet '{walletName}'. Please ensure the wallet exists and is spelled correctly.")
+                
+            print(f"Successfully loaded wallet {walletName}")
+            
+            dInfo = daemonInfo()
+            dInfo['walletName'] = walletName
+            updateDaemonInfo(dInfo)
+            
+            newWallet = False
+            
+        else:
+            print("Making new wallet...")
+            makeWallet()
         
     else:
         clear()
@@ -550,7 +630,7 @@ def quickstart():
                     
                 while True:
                     
-                    keyIndex = input(f"Please enter the number of the wallet you want to use: ")
+                    keyIndex = input(f"Please enter the number of the ExtPubKey you want to use: ")
                     
                     if keyIndex.isdigit() == False:
                         print(f"{Fore.RED}Invalid answer. Answer must be a number matching a key.{Style.RESET_ALL}")
@@ -567,7 +647,7 @@ def quickstart():
                 dInfo['extPubKey'] = extKey
                 dInfo['extPubKeyLabel'] = extLabel
                 updateDaemonInfo(dInfo)
-                input(f"Your extPublicKey is:\n{Fore.GREEN}{extKey}{Style.RESET_ALL}\nPress Enter to continue...")
+                input(f"Your ExtPublicKey is:\n{Fore.GREEN}{extKey}{Style.RESET_ALL}\nPress Enter to continue...")
                 break
                     
             elif ans.lower() == 'n':
@@ -611,6 +691,9 @@ def quickstart():
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
     print(f"Quick start success!")
+    dInfo = daemonInfo()
+    dInfo['firstRun'] = False
+    updateDaemonInfo(dInfo)
 
 def makeExtKey():
     while True:
@@ -666,6 +749,101 @@ def isUpToDate():
         return False
     else:
         return True
+
+def private():
+    if daemonInfo()['firstRun'] == True:
+        showError(f"You must run 'ghostVault.py quickstart' fisrt.")
+    
+    if daemonInfo()['anonMode'] == True:
+        print(f"Enhanced privacy mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
+        print(f"You can run '{Fore.CYAN}ghostVault.py setrewardaddress' to disable this mode.{Style.RESET_ALL}")
+    
+    else:
+        print(f"Enhanced privacy mode is {Fore.RED}NOT Active!{Style.RESET_ALL}\n\n")
+        
+        while True:
+            
+            ans = input(f"Press Enter to quit or type '{Fore.CYAN}private{Style.RESET_ALL}' to continue with\nEnhanced privacy mode setup. ")
+            
+            if ans == "private":
+                privateSetup()
+            elif ans = "":
+                break
+            else:
+                print(f"Invalid answer")
+            
+
+def privateSetup():
+    cronFound = False
+    cronPayFound = False
+    clear()
+    print(f"Welcome the the Enhanced Privacy setup wizard.")
+    
+    makeAnonAddress()
+    
+    addr = getNewAddr()
+    setRewardAddress(addr)
+    cmd = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cron"
+    cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cronPay"
+    print("Setting up cron job")
+    cron = CronTab(user=True)
+    for job in cron:
+        if cmd in job:
+            print(f"cron job found, skipping")
+            cronFound = True
+        elif cmdPay in job:
+            print(f"cron job found, skipping")
+            cronPayFound = True
+            
+    if cronFound == False:
+        try:
+            job = cron.new(command=cmd)
+            job.hour.every(12)
+            cron.write()
+            
+        except Exception as e:
+            showError(e)
+    
+    if cronPayFound == False:
+        try:
+            job2 = cron.new(command=cmdPay)
+            job2.minute.every(15)
+            cron.write()
+            
+        except Exception as e:
+            showError(e)
+    print("Cron successfully set.\n")
+    
+    print(f"Enhanced privacy mode successfully activated!")
+    
+def cronRewardAddr():
+    
+    if daemonInfo()['anonMode'] == False:
+        return
+    currAddr = getRewardAddressFromWallet()
+    
+    if currAddr == None:
+        return
+    
+    stakes = rpcproxy().filtertransactions({"count":100000,"category":"stake","collate":True,"with_reward":True})
+    
+    if stakes['collated']['records'] > 0:
+        addr = getNewAddr()
+        setRewardAddress(addr)
+
+def cronPayment():
+    if daemonInfo()['anonMode'] == False or daemonInfo()['anonRewardAddress'] == "":
+        return
+    balance = getBalances['mine']['trusted']
+    
+    if balance > 0.1:
+        try:
+            txid = rpcproxy().sendtypeto("ghost", "anon", [{"address": f"{daemonInfo()['anonRewardAddress']}", "amount": balance, "subfee": True}])
+        except Exception as e:
+            showError(e)
+        
+        with open("payment.log", "a") as f:
+            f.write(f"{datetime.datetime.utcnow()} TXID: {txid} AMOUNT: {balance}\n")
 
 def status():
     clear()
@@ -803,7 +981,41 @@ def status():
     
     
     
+def makeAnonAddress():
+    while True:
+        clear()
+        ans = input(f"Please enter the anon address that you wish to recieve block rewards at: ")
+        
+        if validateAddress(ans) == True:
+            print(f"You have selected to recieve rewards at:\n{ans}")
+            confirm = input(f"Press Enter to confirm or enter anyting to try again.")
+            
+            if confirm == "":
+                setAnonAddress(ans)
+                break
+            else:
+                pass
+        else:
+            print(f"Not a valid Ghost address. Please try again.")
+
 def makeRewardAddress():
+    
+    if daemonInfo()['anonMode'] == True:
+        clear()
+        print(f"Enhanced privacy mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
+        print(f"Continuing will disable Enhanced privacy mode.")
+        while True:
+            ans = input(f"Type '{Fore.CYAN}public{Style.RESET_ALL}' to continue or Enter to exit: ")
+            
+            if ans == 'public':
+                print(f"Continuing...")
+                break
+            elif ans == '':
+                print(f"Exiting...")
+                sys.exit()
+            else:
+                print(f"Unknown answer, please try again.")
+    
     while True:
         clear()
         ans = input(f"Please enter the address that you wish to recieve block rewards at: ")
@@ -814,6 +1026,10 @@ def makeRewardAddress():
             
             if confirm == "":
                 setRewardAddress(ans)
+                if daemonInfo()['anonMode'] == True:
+                    dInfo = daemonInfo()
+                    dInfo['anonMode'] = False
+                    updateDaemonInfo(dInfo)
                 break
             else:
                 pass
@@ -911,8 +1127,6 @@ def main():
                 prepareDataDir()
                 startDaemon()
                 
-                
-        
         elif arg == "checkchain":
             if isBadFork() == False:
                 print(f"You are on the correct chain!")
@@ -934,6 +1148,18 @@ def main():
         
         elif arg == "status":
             status()
+        
+        elif arg == "private":
+            private()
+            
+        elif arg == 'stats':
+            getStats()
+        
+        elif arg == 'cron':
+            cronRewardAddr()
+        
+        elif arg == 'cronPay':
+            cronPayment()
         
         else:
             print(f"Unknown argument '{arg}'.\nPlease run '{Fore.CYAN}ghostVault.py help{Style.RESET_ALL}' for full list of commands.")
