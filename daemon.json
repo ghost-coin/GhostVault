@@ -6,5 +6,7 @@
     "extPubKey": "",
     "extPubKeyLabel": "",
     "rewardAddress": "",
-    "archive": ""
+    "archive": "", 
+    "anonMode" false,
+    "anonRewardAddress": ""
 }
