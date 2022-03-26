@@ -785,7 +785,7 @@ def privateSetup():
     addr = getNewAddr()
     setRewardAddress(addr)
     cmd = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cron"
-    cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cronPay"
+    cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cronpay"
     print("Setting up cron job")
     cron = CronTab(user=True)
     for job in cron:
@@ -830,7 +830,7 @@ def cronRewardAddr():
     if currAddr == None:
         return
     
-    stakes = rpcproxy().filtertransactions({"search": f"{currAddr}","count":100000,"category":"stake","collate":True,"with_reward":True})
+    stakes = rpcproxy().filtertransactions({"search": f"{currAddr}","count":0,"category":"stake","collate":True,"with_reward":True})
     
     if stakes['collated']['records'] > 0:
         addr = getNewAddr()
@@ -1163,7 +1163,7 @@ def main():
         elif arg == 'cron':
             cronRewardAddr()
         
-        elif arg == 'cronPay':
+        elif arg == 'cronpay':
             cronPayment()
         
         else:
