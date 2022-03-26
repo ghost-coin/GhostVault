@@ -815,6 +815,10 @@ def privateSetup():
             showError(e)
     print("Cron successfully set.\n")
     
+    dInfo = daemonInfo()
+    dInfo['anonMode'] = True
+    updateDaemonInfo(dInfo)
+    
     print(f"Enhanced privacy mode successfully activated!")
     
 def cronRewardAddr():
