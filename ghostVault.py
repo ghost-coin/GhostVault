@@ -767,6 +767,7 @@ def private():
             
             if ans == "private":
                 privateSetup()
+                break
             elif ans == "":
                 break
             else:
