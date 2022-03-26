@@ -848,7 +848,7 @@ def cronPayment():
             showError(e)
         
         with open("payment.log", "a") as f:
-            f.write(f"{datetime.datetime.utcnow()} TXID: {txid} AMOUNT: {balance}\n")
+            f.write(f"{datetime.utcnow()} TXID: {txid} AMOUNT: {balance}\n")
 
 def status():
     clear()
