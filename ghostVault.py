@@ -839,7 +839,7 @@ def cronRewardAddr():
 def cronPayment():
     if daemonInfo()['anonMode'] == False or daemonInfo()['anonRewardAddress'] == "":
         return
-    balance = getBalances['mine']['trusted']
+    balance = getBalances()['mine']['trusted']
     
     if balance > 0.1:
         try:
