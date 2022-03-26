@@ -78,7 +78,7 @@ def getNewExtAddr(label):
     return extAddr
     
 def getNewAddr():
-    addr = rpcproxy().getnewddress("", False, False, False, "legacy")
+    addr = rpcproxy().getnewaddress("", False, False, False, "legacy")
     return addr
 
 def validateAddress(address):
@@ -825,7 +825,7 @@ def cronRewardAddr():
     if currAddr == None:
         return
     
-    stakes = rpcproxy().filtertransactions({"count":100000,"category":"stake","collate":True,"with_reward":True})
+    stakes = rpcproxy().filtertransactions({"search": f"{currAddr}","count":100000,"category":"stake","collate":True,"with_reward":True})
     
     if stakes['collated']['records'] > 0:
         addr = getNewAddr()
