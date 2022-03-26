@@ -789,10 +789,10 @@ def privateSetup():
     print("Setting up cron job")
     cron = CronTab(user=True)
     for job in cron:
-        if cmd in job:
+        if cmd in str(job):
             print(f"cron job found, skipping")
             cronFound = True
-        elif cmdPay in job:
+        elif cmdPay in str(job):
             print(f"cron job found, skipping")
             cronPayFound = True
             
