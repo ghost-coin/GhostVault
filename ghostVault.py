@@ -90,7 +90,6 @@ def validateAddress(address):
         return False
 
 def getColdStakingInfo():
-    
     if checkWalletLoad() == False:
         showError(f"No wallet loaded!")
     
@@ -131,11 +130,10 @@ def getKeysAvailable():
     return keys
 
 def setRewardAddress(rewardAddress):
-    
     if validateAddress(rewardAddress) == False:
         showError(f"Invalid Ghost address: {rewardAddress}")
         
-    print(f"Setting reward address to: {rewardAddress}...")
+    print(f"Setting reward address to: {Fore.CYAN}{rewardAddress}{Style.RESET_ALL}...")
     
     try:
         rpcproxy().walletsettings("stakingoptions", {"rewardaddress": rewardAddress})
@@ -147,11 +145,10 @@ def setRewardAddress(rewardAddress):
     print(f"Reward address successfully updated.")
 
 def setAnonAddress(rewardAddress):
-    
     if validateAddress(rewardAddress) == False:
         showError(f"Invalid Ghost address: {rewardAddress}")
         
-    print(f"Setting reward address to: {rewardAddress}...")
+    print(f"Setting anon reward address to: {Fore.CYAN}{rewardAddress}{Style.RESET_ALL}...")
 
     dInfo = daemonInfo()
     dInfo['anonRewardAddress'] = rewardAddress
@@ -168,7 +165,6 @@ def getRewardAddressFromWallet():
     else:
         return None
         
-
 def mnemonic():
     words = rpcproxy().mnemonic("new", "", "english")['mnemonic']
     return words
@@ -424,7 +420,6 @@ def startDaemon():
             pass
     
 def stopDaemon():
-    
     if checkConnect() == False:
         print("Daemon not running...")
     else:
@@ -479,7 +474,7 @@ def getStats(duration="all", days=None):
         durations = [("24h", last24), ("7 Days", last7d), ("30 Days", last30d), ("180 Days", last180d), ("Year", last365d)]
         clear()
         
-        print(f"GhostVault {version} Staking Stats Page\n\n")
+        print(f"GhostVault {version} Staking Stats Page\n")
         
         print(f"{Fore.BLUE}DURATION        STAKES FOUND        AMOUNT EARNED{Style.RESET_ALL}")
         
@@ -497,9 +492,7 @@ def quickstart():
     print(f"To start with, we will download the daemon and get synced with the Ghost network.")
     input("Press Enter to continue...")
     
-    if checkConnect() == True:
-        stopDaemon()
-    
+    stopDaemon()
     downloadDaemon()
     extractDaemon()
     prepareDataDir()
@@ -578,6 +571,8 @@ def quickstart():
                 clear()
                 
                 for i in getWallets():
+                    if i == "":
+                        i = '[default wallet]'
                     print(f"{count}. {i}")
                     count += 1
                 
@@ -611,7 +606,6 @@ def quickstart():
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
             
-    
     if newWallet == False and len(getKeysAvailable()) > 0:
         keys = getKeysAvailable()
         
@@ -861,6 +855,11 @@ def status():
     print(f"Hostname                        : {Fore.GREEN}{platform.node()}{Style.RESET_ALL}")
     print(f"Uptime/Load Average             : {Fore.GREEN}{str(timedelta(seconds=uptime())).split('.')[0]}, {getLoad()[0]} {getLoad()[1]} {getLoad()[2]}{Style.RESET_ALL}")
     
+    if daemonInfo()['anonMode'] == True:
+        print(f"privacy mode                    : {Fore.GREEN}ENHANCED{Style.RESET_ALL}")
+    else:
+        print(f"privacy mode                    : {Fore.RED}NORMAL{Style.RESET_ALL}")
+    
     if checkConnect() == False:
         print(f"ghostd version                  : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
         print(f"ghostd up-to-date               : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
@@ -984,15 +983,13 @@ def status():
             
     print("\n" + f"{Fore.BLUE}#{Style.RESET_ALL}"*80)
     
-    
-    
 def makeAnonAddress():
     while True:
         clear()
         ans = input(f"Please enter the anon address that you wish to recieve block rewards at: ")
         
-        if validateAddress(ans) == True:
-            print(f"You have selected to recieve rewards at:\n{ans}")
+        if validateAddress(ans) == True and ans.startswith("SP") == True:
+            print(f"You have selected to recieve rewards at:\n{Fore.CYAN}{ans}{Style.RESET_ALL}\n")
             confirm = input(f"Press Enter to confirm or enter anyting to try again.")
             
             if confirm == "":
@@ -1001,7 +998,7 @@ def makeAnonAddress():
             else:
                 pass
         else:
-            print(f"Not a valid Ghost address. Please try again.")
+            print(f"Not a valid Ghost anon address. Please try again.")
 
 def makeRewardAddress():
     
@@ -1026,7 +1023,7 @@ def makeRewardAddress():
         ans = input(f"Please enter the address that you wish to recieve block rewards at: ")
         
         if validateAddress(ans) == True:
-            print(f"You have selected to recieve rewards at: {ans}")
+            print(f"You have selected to recieve rewards at: {Fore.CYAN}{ans}{Style.RESET_ALL}\n")
             confirm = input(f"Press Enter to confirm or enter anyting to try again.")
             
             if confirm == "":
@@ -1165,14 +1162,24 @@ def main():
         
         elif arg == 'cronpay':
             cronPayment()
-        
+            
+        elif arg == 'anonaddress':
+            if daemonInfo()['anonMode'] == False:
+                print(f"Enhanced Privacy Mode not active!\nPlease run '{Fore.CYAN}ghostVault.py private{Style.RESET_ALL}' to activate Enhanced Privacy Mode.")
+            else:
+                print(f"Your anon reward address is currently set to:\n\n{Fore.CYAN}{daemonInfo()['anonRewardAddress']}{Style.RESET_ALL}")
+                
+        elif arg == 'setanonaddress':
+            if daemonInfo()['anonMode'] == False:
+                print(f"Enhanced Privacy Mode not active!\nPlease run '{Fore.CYAN}ghostVault.py private{Style.RESET_ALL}' to activate Enhanced Privacy Mode.")
+            else:
+                makeAnonAddress()
+                
         else:
             print(f"Unknown argument '{arg}'.\nPlease run '{Fore.CYAN}ghostVault.py help{Style.RESET_ALL}' for full list of commands.")
-        
-        
+                
     else:
         help()
-
 
 if __name__ == "__main__":
     main()
