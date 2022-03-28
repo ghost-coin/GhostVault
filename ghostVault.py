@@ -18,7 +18,7 @@ RPCPORT = 51725
 version = "v0.4"
 
 def rpcproxy():
-    rpcproxy = AuthServiceProxy('http://%s:%s@127.0.0.1:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT))
+    rpcproxy = AuthServiceProxy('http://%s:%s@192.168.12.172:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT))
     return rpcproxy
 
 def checkConnect():
@@ -843,8 +843,11 @@ def status():
     clear()
     repo = git.Repo(os.path.expanduser("~/GhostVault"))
     repo.remotes.origin.pull()
+    tnow = time.time()
+    day = 86400
+    filter = rpcproxy().filtertransactions({"from":int(tnow-day), "to":int(tnow),"count":100000,"category":"stake","collate":True,"include_watchonly":True,"with_reward":True})
     
-    print(f"{Fore.BLUE}#{Style.RESET_ALL}"*80 + "\n")
+    print(f"{Fore.BLUE}#{Style.RESET_ALL}"*80)
 
     print(f"GhostVault {version}")
     print(f"Hostname                        : {Fore.GREEN}{platform.node()}{Style.RESET_ALL}")
@@ -870,7 +873,9 @@ def status():
         print(f"ghostd staking currently?       : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
         print(f"ghostd staking difficulty       : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
         print(f"ghostd network stakeweight      : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
-        print(f"ghostd staked amount            : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"currently staking               : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"total in coldstaking            : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"stakes/earned last 24h          : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
     
     elif isUpToDate() == False:
         print(f"ghostd version                  : {Fore.RED}{getNetworkInfo()['subversion'].split(':')[1].replace('/', '')}{Style.RESET_ALL}")
@@ -918,10 +923,20 @@ def status():
         print(f"ghostd staking difficulty       : {Fore.GREEN}{getStakingInfo()['difficulty']}{Style.RESET_ALL}")
         print(f"ghostd network stakeweight      : {Fore.GREEN}{convertFromSat(getStakingInfo()['netstakeweight']):,}{Style.RESET_ALL}")
         
-        if getColdStakingInfo()['coin_in_coldstakeable_script'] == 0:
-            print(f"ghostd staked amount            : {Fore.RED}0{Style.RESET_ALL}")
+        if getColdStakingInfo()['currently_staking'] == 0:
+            print(f"currently staking               : {Fore.RED}0{Style.RESET_ALL}")
         else:
-            print(f"ghostd staked amount            : {Fore.GREEN}{getColdStakingInfo()['coin_in_coldstakeable_script']}{Style.RESET_ALL}")
+            print(f"currently staking               : {Fore.GREEN}{getColdStakingInfo()['currently_staking']}{Style.RESET_ALL}")
+            
+        if getColdStakingInfo()['coin_in_coldstakeable_script'] == 0:
+            print(f"total in coldstaking            : {Fore.RED}0{Style.RESET_ALL}")
+        else:
+            print(f"total in coldstaking            : {Fore.GREEN}{getColdStakingInfo()['coin_in_coldstakeable_script']}{Style.RESET_ALL}")
+            
+        if filter['collated']['records'] == 0:
+            print(f"stakes/earned last 24h          : {Fore.RED}0{Style.RESET_ALL}/{Fore.RED}0{Style.RESET_ALL}")
+        else:
+            print(f"stakes/earned last 24h          : {Fore.GREEN}{filter['collated']['records']}{Style.RESET_ALL}/{Fore.GREEN}{filter['collated']['total_reward']}{Style.RESET_ALL}")
             
             
     
@@ -971,12 +986,22 @@ def status():
         print(f"ghostd staking difficulty       : {Fore.GREEN}{getStakingInfo()['difficulty']}{Style.RESET_ALL}")
         print(f"ghostd network stakeweight      : {Fore.GREEN}{convertFromSat(getStakingInfo()['netstakeweight']):,}{Style.RESET_ALL}")
         
-        if getColdStakingInfo()['coin_in_coldstakeable_script'] == 0:
-            print(f"ghostd staked amount            : {Fore.RED}0{Style.RESET_ALL}")
+        if getColdStakingInfo()['currently_staking'] == 0:
+            print(f"currently staking               : {Fore.RED}0{Style.RESET_ALL}")
         else:
-            print(f"ghostd staked amount            : {Fore.GREEN}{getColdStakingInfo()['coin_in_coldstakeable_script']}{Style.RESET_ALL}")
+            print(f"currently staking               : {Fore.GREEN}{getColdStakingInfo()['currently_staking']}{Style.RESET_ALL}")
             
-    print("\n" + f"{Fore.BLUE}#{Style.RESET_ALL}"*80)
+        if getColdStakingInfo()['coin_in_coldstakeable_script'] == 0:
+            print(f"total in coldstaking            : {Fore.RED}0{Style.RESET_ALL}")
+        else:
+            print(f"total in coldstaking            : {Fore.GREEN}{getColdStakingInfo()['coin_in_coldstakeable_script']}{Style.RESET_ALL}")
+            
+        if filter['collated']['records'] == 0:
+            print(f"stakes/earned last 24h          : {Fore.RED}0{Style.RESET_ALL}/{Fore.RED}0{Style.RESET_ALL}")
+        else:
+            print(f"stakes/earned last 24h          : {Fore.GREEN}{filter['collated']['records']}{Style.RESET_ALL}/{Fore.GREEN}{filter['collated']['total_reward']}{Style.RESET_ALL}")
+            
+    print(f"{Fore.BLUE}#{Style.RESET_ALL}"*80)
     
 def makeAnonAddress():
     while True:
