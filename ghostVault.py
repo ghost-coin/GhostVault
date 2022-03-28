@@ -29,7 +29,6 @@ def checkConnect():
         return False
 
 def checkWalletLoad():
-    
     try:
         rpcproxy().getstakinginfo()
         return True
@@ -343,7 +342,6 @@ def getDaemonHash(daemonPath):
     return getHash(daemonPath)
 
 def isValidArchiveHash(archive):
-    
     readable_hash = getHash(archive)
     with open("links.json") as f:
         links = json.loads(f.read())
@@ -354,7 +352,6 @@ def isValidArchiveHash(archive):
         return False
 
 def isValidDaemonHash():
-    
     storeHash = daemonInfo()['ghostdHash']
     
     readable_hash = getHash(daemonInfo()['ghostdPath'])
@@ -371,7 +368,6 @@ def getHash(path):
     return readable_hash
 
 def prepareDataDir():
-    
     datadir = os.path.expanduser('~/.ghost/')
     
     if os.path.isdir(datadir):
@@ -402,7 +398,6 @@ def updateDaemonInfo(dInfo):
         f.truncate()
 
 def startDaemon():
-    
     if os.path.isfile(daemonInfo()['ghostdPath']) == False:
         showError(f"ghostd not found! run GhostVault with 'update' or 'quickstart' argument to install daemon.")
     
@@ -479,7 +474,7 @@ def getStats(duration="all", days=None):
         print(f"{Fore.BLUE}DURATION        STAKES FOUND        AMOUNT EARNED{Style.RESET_ALL}")
         
         for i in durations:
-            filter = rpcproxy().filtertransactions({"from":f"{int(i[1])}", "to":f"{int(tnow)}","count":100000,"category":"stake","collate":True,"include_watchonly":True,"with_reward":True})
+            filter = rpcproxy().filtertransactions({"from":fint(i[1]), "to":int(tnow),"count":100000,"category":"stake","collate":True,"include_watchonly":True,"with_reward":True})
 
             print(f"Last {i[0]:<9}        {Fore.GREEN}{filter['collated']['records']}                 {filter['collated']['total_reward']}{Style.RESET_ALL}")
 
@@ -835,7 +830,7 @@ def cronPayment():
         return
     balance = getBalances()['mine']['trusted']
     
-    if balance > 0.1:
+    if balance >= 0.1:
         try:
             txid = rpcproxy().sendtypeto("ghost", "anon", [{"address": f"{daemonInfo()['anonRewardAddress']}", "amount": balance, "subfee": True}])
         except Exception as e:
