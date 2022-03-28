@@ -18,7 +18,7 @@ RPCPORT = 51725
 version = "v0.4"
 
 def rpcproxy():
-    rpcproxy = AuthServiceProxy('http://%s:%s@192.168.12.172:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT))
+    rpcproxy = AuthServiceProxy('http://%s:%s@127.0.0.1:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT))
     return rpcproxy
 
 def checkConnect():
