@@ -845,7 +845,8 @@ def status():
     repo.remotes.origin.pull()
     tnow = time.time()
     day = 86400
-    filter = rpcproxy().filtertransactions({"from":int(tnow-day), "to":int(tnow),"count":100000,"category":"stake","collate":True,"include_watchonly":True,"with_reward":True})
+    day = tnow - day
+    filter = rpcproxy().filtertransactions({"from":int(day), "to":int(tnow),"count":100000,"category":"stake","collate":True,"include_watchonly":True,"with_reward":True})
     
     print(f"{Fore.BLUE}#{Style.RESET_ALL}"*80)
 
