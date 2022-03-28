@@ -15,7 +15,7 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v0.4"
+version = "v0.5"
 
 def rpcproxy():
     rpcproxy = AuthServiceProxy('http://%s:%s@127.0.0.1:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT))
@@ -76,8 +76,8 @@ def getNewExtAddr(label):
     extAddr = rpcproxy().getnewextaddress(label)
     return extAddr
     
-def getNewAddr():
-    addr = rpcproxy().getnewaddress("", False, False, False, "legacy")
+def getNewStealthAddr():
+    addr = rpcproxy().getnewstealthaddress()
     return addr
 
 def validateAddress(address):
@@ -357,6 +357,12 @@ def isValidDaemonHash():
     readable_hash = getHash(daemonInfo()['ghostdPath'])
     
     if storeHash == readable_hash:
+        return True
+    else:
+        return False
+
+def isStealthAddr(addr):
+    if validateAddress(addr) == True and addr.startswith("SP") == True:
         return True
     else:
         return False
@@ -744,15 +750,15 @@ def private():
         showError(f"You must run 'ghostVault.py quickstart' fisrt.")
     
     if daemonInfo()['anonMode'] == True:
-        print(f"Enhanced privacy mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
+        print(f"ANON mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
         print(f"You can run '{Fore.CYAN}ghostVault.py setrewardaddress' to disable this mode.{Style.RESET_ALL}")
     
     else:
-        print(f"Enhanced privacy mode is {Fore.RED}NOT Active!{Style.RESET_ALL}\n\n")
+        print(f"ANON mode is {Fore.RED}NOT Active!{Style.RESET_ALL}\n\n")
         
         while True:
             
-            ans = input(f"Press Enter to quit or type '{Fore.CYAN}private{Style.RESET_ALL}' to continue with\nEnhanced privacy mode setup. ")
+            ans = input(f"Press Enter to quit or type '{Fore.CYAN}private{Style.RESET_ALL}' to continue with\nANON mode setup. ")
             
             if ans == "private":
                 privateSetup()
@@ -764,80 +770,70 @@ def private():
             
 
 def privateSetup():
-    cronFound = False
     cronPayFound = False
     clear()
-    print(f"Welcome the the Enhanced Privacy setup wizard.")
+    print(f"Welcome the the ANON Mode setup wizard.")
     
     makeAnonAddress()
     
-    addr = getNewAddr()
+    addr = getNewStealthAddr()
     setRewardAddress(addr)
-    cmd = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cron"
     cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cronpay"
     print("Setting up cron job")
     cron = CronTab(user=True)
     for job in cron:
-        if cmd in str(job):
-            print(f"cron job found, skipping")
-            cronFound = True
-        elif cmdPay in str(job):
+        if cmdPay in str(job):
             print(f"cron job found, skipping")
             cronPayFound = True
             
-    if cronFound == False:
-        try:
-            job = cron.new(command=cmd)
-            job.hour.every(12)
-            cron.write()
-            
-        except Exception as e:
-            showError(e)
-    
     if cronPayFound == False:
         try:
-            job2 = cron.new(command=cmdPay)
-            job2.minute.every(15)
+            job = cron.new(command=cmdPay)
+            job.minute.every(15)
             cron.write()
+            print("Cron successfully set.\n")
             
         except Exception as e:
             showError(e)
-    print("Cron successfully set.\n")
     
     dInfo = daemonInfo()
     dInfo['anonMode'] = True
+    dInfo['internalAnon'] = addr
     updateDaemonInfo(dInfo)
     
-    print(f"Enhanced privacy mode successfully activated!")
-    
-def cronRewardAddr():
-    
-    if daemonInfo()['anonMode'] == False:
-        return
-    currAddr = getRewardAddressFromWallet()
-    
-    if currAddr == None:
-        return
-    
-    stakes = rpcproxy().filtertransactions({"search": f"{currAddr}","count":0,"category":"stake","collate":True,"with_reward":True})
-    
-    if stakes['collated']['records'] > 0:
-        addr = getNewAddr()
-        setRewardAddress(addr)
+    print(f"ANON mode successfully activated!")
 
 def cronPayment():
-    if daemonInfo()['anonMode'] == False or daemonInfo()['anonRewardAddress'] == "":
+    if daemonInfo()['anonRewardAddress'] == "" or validateAddress(daemonInfo()['anonRewardAddress']) == False:
         return
     balance = getBalances()['mine']['trusted']
     
+    if isStealthAddr(daemonInfo()['anonRewardAddress']) == True:
+        payee = daemonInfo()['anonRewardAddress']
+        ptype = "ext anon"
+    else:
+        payee = daemonInfo()['internalAnon']
+        ptype = "int anon"
+    
     if balance >= 0.1:
         try:
-            txid = rpcproxy().sendtypeto("ghost", "anon", [{"address": f"{daemonInfo()['anonRewardAddress']}", "amount": balance, "subfee": True}])
+            txid = rpcproxy().sendtypeto("ghost", "anon", [{"address": payee, "amount": balance, "subfee": True}])
         except Exception as e:
             showError(e)
         
         with open("payment.log", "a") as f:
-            f.write(f"{datetime.utcnow()} TXID: {txid} AMOUNT: {balance}\n")
+            f.write(f"{datetime.utcnow()} TYPE: {ptype} TXID: {txid} AMOUNT: {balance}\n")
+            
+    anonBalance = getBalances()['mine']['anon_trusted']
+    
+    if anonBalance >= 0.1:
+        try:
+            txid = rpcproxy().sendtypeto("anon", "ghost", [{"address": f"{daemonInfo()['anonRewardAddress']}", "amount": anonBalance, "subfee": True}])
+        except Exception as e:
+            showError(e)
+        
+        with open("payment.log", "a") as f:
+            f.write(f"{datetime.utcnow()} TYPE: ext pub TXID: {txid} AMOUNT: {anonBalance}\n")
 
 def status():
     clear()
@@ -855,7 +851,9 @@ def status():
     print(f"Uptime/Load Average             : {Fore.GREEN}{str(timedelta(seconds=uptime())).split('.')[0]}, {getLoad()[0]} {getLoad()[1]} {getLoad()[2]}{Style.RESET_ALL}")
     
     if daemonInfo()['anonMode'] == True:
-        print(f"privacy mode                    : {Fore.GREEN}ENHANCED{Style.RESET_ALL}")
+        print(f"privacy mode                    : {Fore.GREEN}ANON{Style.RESET_ALL}")
+    elif isStealthAddr(daemonInfo()['rewardAddress']) == True:
+        print(f"privacy mode                    : {Fore.YELLOW}ENHANCED{Style.RESET_ALL}")
     else:
         print(f"privacy mode                    : {Fore.RED}NORMAL{Style.RESET_ALL}")
     
@@ -1007,9 +1005,11 @@ def status():
 def makeAnonAddress():
     while True:
         clear()
-        ans = input(f"Please enter the anon address that you wish to recieve block rewards at: ")
+        print(f"If you use a stealth address funds will be sent directly to it.")
+        print(f"If you use a public address, funds will pass through your\ncoldstaking node's internal anon wallet before being sent to your public address\n")
+        ans = input(f"Please enter the address that you wish to recieve block rewards at: ")
         
-        if validateAddress(ans) == True and ans.startswith("SP") == True:
+        if validateAddress(ans) == True:
             print(f"You have selected to recieve rewards at:\n{Fore.CYAN}{ans}{Style.RESET_ALL}\n")
             confirm = input(f"Press Enter to confirm or enter anyting to try again.")
             
@@ -1019,14 +1019,13 @@ def makeAnonAddress():
             else:
                 pass
         else:
-            print(f"Not a valid Ghost anon address. Please try again.")
+            print(f"Not a valid Ghost address. Please try again.")
 
 def makeRewardAddress():
-    
     if daemonInfo()['anonMode'] == True:
         clear()
-        print(f"Enhanced privacy mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
-        print(f"Continuing will disable Enhanced privacy mode.")
+        print(f"ANON mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
+        print(f"Continuing will disable ANON mode.")
         while True:
             ans = input(f"Type '{Fore.CYAN}public{Style.RESET_ALL}' to continue or Enter to exit: ")
             
@@ -1041,6 +1040,7 @@ def makeRewardAddress():
     
     while True:
         clear()
+        print(f"Using a stealth address will enable Enhanced Privacy.")
         ans = input(f"Please enter the address that you wish to recieve block rewards at: ")
         
         if validateAddress(ans) == True:
@@ -1089,7 +1089,6 @@ def help():
     print(f"{Fore.BLUE}update{Style.RESET_ALL}            :  Self updater for GhostVault and ghostd.")
 
 def main():
-    
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower()
         if arg == "help":
@@ -1178,21 +1177,18 @@ def main():
         elif arg == 'stats':
             getStats()
         
-        elif arg == 'cron':
-            cronRewardAddr()
-        
         elif arg == 'cronpay':
             cronPayment()
             
         elif arg == 'anonaddress':
             if daemonInfo()['anonMode'] == False:
-                print(f"Enhanced Privacy Mode not active!\nPlease run '{Fore.CYAN}ghostVault.py private{Style.RESET_ALL}' to activate Enhanced Privacy Mode.")
+                print(f"ANON Mode not active!\nPlease run '{Fore.CYAN}ghostVault.py private{Style.RESET_ALL}' to activate ANON Mode.")
             else:
                 print(f"Your anon reward address is currently set to:\n\n{Fore.CYAN}{daemonInfo()['anonRewardAddress']}{Style.RESET_ALL}")
                 
         elif arg == 'setanonaddress':
             if daemonInfo()['anonMode'] == False:
-                print(f"Enhanced Privacy Mode not active!\nPlease run '{Fore.CYAN}ghostVault.py private{Style.RESET_ALL}' to activate Enhanced Privacy Mode.")
+                print(f"ANON Mode not active!\nPlease run '{Fore.CYAN}ghostVault.py private{Style.RESET_ALL}' to activate ANON Mode.")
             else:
                 makeAnonAddress()
                 
