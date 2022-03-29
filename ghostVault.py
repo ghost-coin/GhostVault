@@ -768,7 +768,6 @@ def private():
             else:
                 print(f"Invalid answer")
             
-
 def privateSetup():
     cronPayFound = False
     clear()
@@ -1191,6 +1190,10 @@ def main():
                 print(f"ANON Mode not active!\nPlease run '{Fore.CYAN}ghostVault.py private{Style.RESET_ALL}' to activate ANON Mode.")
             else:
                 makeAnonAddress()
+                
+        elif arg == 'balance':
+            print(f"GhostVault {version} balances.\n")
+            print(f"{getBalances()}")
                 
         else:
             print(f"Unknown argument '{arg}'.\nPlease run '{Fore.CYAN}ghostVault.py help{Style.RESET_ALL}' for full list of commands.")
