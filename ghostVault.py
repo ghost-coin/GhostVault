@@ -690,7 +690,7 @@ def quickstart():
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
                 input("Press Enter to continue...")
-    cronFound == False
+    cronFound = False
     cmd = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py update"
     print("Setting up cron job")
     cron = CronTab(user=True)
