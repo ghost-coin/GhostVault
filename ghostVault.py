@@ -1193,7 +1193,7 @@ def main():
                 
         elif arg == 'balance':
             print(f"GhostVault {version} balances.\n")
-            print(f"{getBalances()}")
+            pprint.pprint(f"{getBalances()}")
                 
         else:
             print(f"Unknown argument '{arg}'.\nPlease run '{Fore.CYAN}ghostVault.py help{Style.RESET_ALL}' for full list of commands.")
