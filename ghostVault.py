@@ -190,9 +190,6 @@ def loadWallet(walletName):
             return
     rpcproxy().loadwallet(walletName)
 
-def ImportWords(words):
-    rpcproxy().extkeyimportmaster(words)
-
 def isBadFork():
     bcInfo = getBlockChainInfo()
     block = bcInfo['blocks']
@@ -685,6 +682,25 @@ def quickstart():
                 break
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
+    cronFound == False
+    cmd = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py update"
+    print("Setting up cron job")
+    cron = CronTab(user=True)
+    for job in cron:
+        if cmd in str(job):
+            print(f"cron job found, skipping")
+            cronFound = True
+            
+    if cronFound == False:
+        try:
+            job = cron.new(command=cmd)
+            job.hour.every(1)
+            cron.write()
+            print("Cron successfully set.\n")
+            
+        except Exception as e:
+            showError(e)
+    
     print(f"Quick start success!")
     dInfo = daemonInfo()
     dInfo['firstRun'] = False
@@ -836,8 +852,6 @@ def cronPayment():
 
 def status():
     clear()
-    repo = git.Repo(os.path.expanduser("~/GhostVault"))
-    repo.remotes.origin.pull()
     tnow = time.time()
     day = 86400
     day = tnow - day
