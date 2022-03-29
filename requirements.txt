@@ -3,3 +3,4 @@ requests
 colorama
 GitPython
 psutil
+python-crontab

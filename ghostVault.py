@@ -8,13 +8,14 @@ import hashlib
 from datetime import datetime, timedelta
 from colorama import Fore, Back, Style
 from colorama import init
-init(autoreset=True)
+from crontab import CronTab
+init()
 
 RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v0.1"
+version = "v0.6"
 
 def rpcproxy():
     rpcproxy = AuthServiceProxy('http://%s:%s@127.0.0.1:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT))
@@ -28,7 +29,6 @@ def checkConnect():
         return False
 
 def checkWalletLoad():
-    
     try:
         rpcproxy().getstakinginfo()
         return True
@@ -75,6 +75,10 @@ def importKey(words):
 def getNewExtAddr(label):
     extAddr = rpcproxy().getnewextaddress(label)
     return extAddr
+    
+def getNewStealthAddr():
+    addr = rpcproxy().getnewstealthaddress()
+    return addr
 
 def validateAddress(address):
     addr = rpcproxy().validateaddress(address)
@@ -85,7 +89,6 @@ def validateAddress(address):
         return False
 
 def getColdStakingInfo():
-    
     if checkWalletLoad() == False:
         showError(f"No wallet loaded!")
     
@@ -107,6 +110,9 @@ def getNetworkInfo():
     network = rpcproxy().getnetworkinfo()
     return network
 
+def getBalances():
+    return rpcproxy().getbalances()
+
 def getKeysAvailable():
     keys = []
     
@@ -123,11 +129,10 @@ def getKeysAvailable():
     return keys
 
 def setRewardAddress(rewardAddress):
-    
     if validateAddress(rewardAddress) == False:
         showError(f"Invalid Ghost address: {rewardAddress}")
         
-    print(f"Setting reward address to: {rewardAddress}...")
+    print(f"Setting reward address to: {Fore.CYAN}{rewardAddress}{Style.RESET_ALL}...")
     
     try:
         rpcproxy().walletsettings("stakingoptions", {"rewardaddress": rewardAddress})
@@ -137,6 +142,17 @@ def setRewardAddress(rewardAddress):
     dInfo['rewardAddress'] = rewardAddress
     updateDaemonInfo(dInfo)
     print(f"Reward address successfully updated.")
+
+def setAnonAddress(rewardAddress):
+    if validateAddress(rewardAddress) == False:
+        showError(f"Invalid Ghost address: {rewardAddress}")
+        
+    print(f"Setting anon reward address to: {Fore.CYAN}{rewardAddress}{Style.RESET_ALL}...")
+
+    dInfo = daemonInfo()
+    dInfo['anonRewardAddress'] = rewardAddress
+    updateDaemonInfo(dInfo)
+    print(f"Anon reward address successfully updated.")
 
 def getRewardAddressFromWallet():
     walletInfo = rpcproxy().walletsettings("stakingoptions")
@@ -148,7 +164,6 @@ def getRewardAddressFromWallet():
     else:
         return None
         
-
 def mnemonic():
     words = rpcproxy().mnemonic("new", "", "english")['mnemonic']
     return words
@@ -165,10 +180,15 @@ def createWallet(walletName):
     rpcproxy().createwallet(walletName)
 
 def loadWallet(walletName):
+    if checkWalletLoad() == True:
+        wallet = rpcproxy.getwalletinfo()['walletname']
+        if wallet == walletName:
+            print("Wallet {walletName} already loaded.")
+            return
+        else:
+            rpcproxy().loadwallet(walletName)
+            return
     rpcproxy().loadwallet(walletName)
-
-def ImportWords(words):
-    rpcproxy().extkeyimportmaster(words)
 
 def isBadFork():
     bcInfo = getBlockChainInfo()
@@ -199,7 +219,7 @@ def syncProgress():
         
         clear()
         print(f"Ghostd is currently syncing with the Ghost network.")
-        print(f"Progress: {blocks:,}/{headers:,} {Fore.GREEN}{round(progress, 3)}%")
+        print(f"Progress: {blocks:,}/{headers:,} {Fore.GREEN}{round(progress, 3)}%{Style.RESET_ALL}")
         
         if initialDl == False or progress == 100:
             time.sleep(1)
@@ -233,7 +253,7 @@ def clear():
         os.system('clear')
 
 def showError(err):
-    print(f"GhostVualt has encountered an error.\nERROR:{Fore.RED}{err}")
+    print(f"GhostVualt has encountered an error.\nERROR:{Fore.RED}{err}{Style.RESET_ALL}")
     sys.exit()
 
 def getLink():
@@ -258,7 +278,7 @@ def downloadFromUrl(url, path):
                 dl += len(data)
                 f.write(data)
                 done = int(50 * dl / total_length)
-                sys.stdout.write(f"{Fore.GREEN}\r[%s%s]" % ('=' * done, ' ' * (50-done)) )    
+                sys.stdout.write(f"{Fore.GREEN}\r[%s%s]{Style.RESET_ALL}" % ('=' * done, ' ' * (50-done)) )    
                 sys.stdout.flush()
     clear()
 
@@ -319,7 +339,6 @@ def getDaemonHash(daemonPath):
     return getHash(daemonPath)
 
 def isValidArchiveHash(archive):
-    
     readable_hash = getHash(archive)
     with open("links.json") as f:
         links = json.loads(f.read())
@@ -330,12 +349,17 @@ def isValidArchiveHash(archive):
         return False
 
 def isValidDaemonHash():
-    
     storeHash = daemonInfo()['ghostdHash']
     
     readable_hash = getHash(daemonInfo()['ghostdPath'])
     
     if storeHash == readable_hash:
+        return True
+    else:
+        return False
+
+def isStealthAddr(addr):
+    if validateAddress(addr) == True and addr.startswith("SP") == True:
         return True
     else:
         return False
@@ -347,7 +371,6 @@ def getHash(path):
     return readable_hash
 
 def prepareDataDir():
-    
     datadir = os.path.expanduser('~/.ghost/')
     
     if os.path.isdir(datadir):
@@ -378,7 +401,6 @@ def updateDaemonInfo(dInfo):
         f.truncate()
 
 def startDaemon():
-    
     if os.path.isfile(daemonInfo()['ghostdPath']) == False:
         showError(f"ghostd not found! run GhostVault with 'update' or 'quickstart' argument to install daemon.")
     
@@ -396,7 +418,6 @@ def startDaemon():
             pass
     
 def stopDaemon():
-    
     if checkConnect() == False:
         print("Daemon not running...")
     else:
@@ -432,6 +453,34 @@ def removeArchive():
     else:
         print('Archive file not found.')
 
+def getStats(duration="all", days=None):
+    tnow = time.time()
+    day = 86400
+    
+    if checkWalletLoad() == False:
+        try:
+            loadWallet(daemonInfo()['walletName'])
+        except:
+            showError(f"Now wallet loaded!")
+    
+    if duration == 'all' and days == None:
+        last24 = tnow - day
+        last7d = tnow - day *7
+        last30d = tnow - day *30
+        last180d = tnow - day *180
+        last365d = tnow - day *365
+        durations = [("24h", last24), ("7 Days", last7d), ("30 Days", last30d), ("180 Days", last180d), ("Year", last365d)]
+        clear()
+        
+        print(f"GhostVault {version} Staking Stats Page\n")
+        
+        print(f"{Fore.BLUE}DURATION        STAKES FOUND        AMOUNT EARNED{Style.RESET_ALL}")
+        
+        for i in durations:
+            filter = rpcproxy().filtertransactions({"from":int(i[1]), "to":int(tnow),"count":100000,"category":"stake","collate":True,"include_watchonly":True,"with_reward":True})
+
+            print(f"Last {i[0]:<9}        {Fore.GREEN}{filter['collated']['records']}                 {filter['collated']['total_reward']}{Style.RESET_ALL}")
+
 def quickstart():
     newWallet = True
     clear()
@@ -441,6 +490,7 @@ def quickstart():
     print(f"To start with, we will download the daemon and get synced with the Ghost network.")
     input("Press Enter to continue...")
     
+    stopDaemon()
     downloadDaemon()
     extractDaemon()
     prepareDataDir()
@@ -455,10 +505,10 @@ def quickstart():
         syncProgress()
     
     if isBadFork() == True:
-        print(f"ERROR: {Fore.RED}Bad Fork detected!")
+        print(f"ERROR: {Fore.RED}Bad Fork detected!{Style.RESET_ALL}")
         
         while True:
-            ans = input(f"Would you like to resync to the correct chain? {Fore.GREEN}Y/{Fore.RED}n ")
+            ans = input(f"Would you like to resync to the correct chain? {Fore.GREEN}Y/{Fore.RED}n{Style.RESET_ALL} ")
             
             if ans.lower() == 'y' or ans.lower() == '':
                 print("Farcing resync...")
@@ -473,7 +523,7 @@ def quickstart():
                 break
                 
             elif ans.lower() == 'n':
-                print(f"{Fore.RED}Exiting!")
+                print(f"{Fore.RED}Exiting!{Style.RESET_ALL}")
                 sys.exit()
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
@@ -481,16 +531,37 @@ def quickstart():
     clear()
     
     if len(getWallets()) == 0:
-        print("No existing wallets detected.\nMaking new...")
+        print(f"No existing wallets detected.")
+        print(f"Sometimes GhostVault will not find a wallet that is existing.\nYou can enter the wallet name and GhostVault will try to load it.\n")
         
-        makeWallet()
+        walletName = input(f"Please enter a wallet name or leave blank to make new: ")
+        
+        if walletName != "":
+            print(f"Attempting to load wallet: {walletName}")
+            
+            try:
+                rpcproxy().loadwallet(walletName)
+            except:
+                showError(f"Failed to load wallet '{walletName}'. Please ensure the wallet exists and is spelled correctly.")
+                
+            print(f"Successfully loaded wallet {walletName}")
+            
+            dInfo = daemonInfo()
+            dInfo['walletName'] = walletName
+            updateDaemonInfo(dInfo)
+            
+            newWallet = False
+            
+        else:
+            print("Making new wallet...")
+            makeWallet()
         
     else:
         clear()
         print("Existing wallets detected!")
         
         while True:
-            ans = input(f"Would you like to use one of these? No to make new: {Fore.GREEN}Y/{Fore.RED}n ")
+            ans = input(f"Would you like to use one of these? No to make new: {Fore.GREEN}Y/{Fore.RED}n{Style.RESET_ALL} ")
             
             if ans.lower() == 'y' or ans.lower() == '':
                 
@@ -498,6 +569,8 @@ def quickstart():
                 clear()
                 
                 for i in getWallets():
+                    if i == "":
+                        i = '[default wallet]'
                     print(f"{count}. {i}")
                     count += 1
                 
@@ -505,10 +578,10 @@ def quickstart():
                     walletIndex = input(f"Please enter the number of the wallet you want to use: ")
                     
                     if walletIndex.isdigit() == False:
-                        print(f"{Fore.RED}Invalid answer. Answer must be a number matching a wallet.")
+                        print(f"{Fore.RED}Invalid answer. Answer must be a number matching a wallet.{Style.RESET_ALL}")
                         
                     elif len(walletIndex) > len(getWallets()):
-                        print(f"{Fore.RED}Invalid answer. Answer must be a number matching a wallet.")
+                        print(f"{Fore.RED}Invalid answer. Answer must be a number matching a wallet.{Style.RESET_ALL}")
                     else:
                         walletName = getWallets()[int(walletIndex)-1]
                         break
@@ -531,14 +604,13 @@ def quickstart():
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
             
-    
     if newWallet == False and len(getKeysAvailable()) > 0:
         keys = getKeysAvailable()
         
         print(f"Extended public keys detected.")
         
         while True:
-            ans = input(f"Would you like to use an existing key? No to make new: {Fore.GREEN}Y/{Fore.RED}n ")
+            ans = input(f"Would you like to use an existing key? No to make new: {Fore.GREEN}Y/{Fore.RED}n{Style.RESET_ALL} ")
             
             if ans.lower() == 'y' or ans.lower() == '':
                 count = 1
@@ -550,13 +622,13 @@ def quickstart():
                     
                 while True:
                     
-                    keyIndex = input(f"Please enter the number of the wallet you want to use: ")
+                    keyIndex = input(f"Please enter the number of the ExtPubKey you want to use: ")
                     
                     if keyIndex.isdigit() == False:
-                        print(f"{Fore.RED}Invalid answer. Answer must be a number matching a key.")
+                        print(f"{Fore.RED}Invalid answer. Answer must be a number matching a key.{Style.RESET_ALL}")
                         
                     elif len(keyIndex) > len(getWallets()):
-                        print(f"{Fore.RED}Invalid answer. Answer must be a number matching a key.")
+                        print(f"{Fore.RED}Invalid answer. Answer must be a number matching a key.{Style.RESET_ALL}")
                     else:
                         extKey = keys[int(keyIndex)-1]['key']
                         extLabel = keys[int(keyIndex)-1]['label']
@@ -567,7 +639,7 @@ def quickstart():
                 dInfo['extPubKey'] = extKey
                 dInfo['extPubKeyLabel'] = extLabel
                 updateDaemonInfo(dInfo)
-                input(f"Your extPublicKey is:\n{Fore.GREEN}{extKey}\nPress Enter to continue...")
+                input(f"Your ExtPublicKey is:\n{Fore.GREEN}{extKey}{Style.RESET_ALL}\nPress Enter to continue...")
                 break
                     
             elif ans.lower() == 'n':
@@ -596,7 +668,7 @@ def quickstart():
         print(f"Reward address found.")
         
         while True:
-            ans = input(f"Would you like to continue using {getRewardAddressFromWallet()} as your reward address? {Fore.GREEN}Y/{Fore.RED}n ")
+            ans = input(f"Would you like to continue using {getRewardAddressFromWallet()} as your reward address? {Fore.GREEN}Y/{Fore.RED}n{Style.RESET_ALL} ")
             
             if ans.lower() == 'y' or ans.lower() == '':
                 dInfo = daemonInfo()
@@ -610,7 +682,29 @@ def quickstart():
                 break
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
+    cronFound == False
+    cmd = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py update"
+    print("Setting up cron job")
+    cron = CronTab(user=True)
+    for job in cron:
+        if cmd in str(job):
+            print(f"cron job found, skipping")
+            cronFound = True
+            
+    if cronFound == False:
+        try:
+            job = cron.new(command=cmd)
+            job.hour.every(1)
+            cron.write()
+            print("Cron successfully set.\n")
+            
+        except Exception as e:
+            showError(e)
+    
     print(f"Quick start success!")
+    dInfo = daemonInfo()
+    dInfo['firstRun'] = False
+    updateDaemonInfo(dInfo)
 
 def makeExtKey():
     while True:
@@ -626,7 +720,7 @@ def makeExtKey():
     dInfo['extPubKey'] = extKey
     dInfo['extPubKeyLabel'] = keyLabel
     updateDaemonInfo(dInfo)
-    input(f"Your extPublicKey is:\n{Fore.GREEN}{extKey}{Fore.WHITE}\nPress Enter to continue...")    
+    input(f"Your extPublicKey is:\n{Fore.GREEN}{extKey}{Style.RESET_ALL}\nPress Enter to continue...")    
 
 def makeWallet():
     while True:
@@ -644,7 +738,7 @@ def makeWallet():
     words = mnemonic()
     clear()
     print(f"Your mnemonic recovery words are:\n")
-    print(textwrap.fill(f"{Fore.GREEN}{words}{Fore.WHITE}", 80))
+    print(textwrap.fill(f"{Fore.GREEN}{words}{Style.RESET_ALL}", 80))
     
     input(f"\nPlease write down or copy these words, in order, and store them in a safe place.\nThese are your recovery words, needed to recover a corrupted wallet.\nPress Enter to continue.")
     
@@ -667,153 +761,311 @@ def isUpToDate():
     else:
         return True
 
+def private():
+    if daemonInfo()['firstRun'] == True:
+        showError(f"You must run 'ghostVault.py quickstart' fisrt.")
+    
+    if daemonInfo()['anonMode'] == True:
+        print(f"ANON mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
+        print(f"You can run '{Fore.CYAN}ghostVault.py setrewardaddress' to disable this mode.{Style.RESET_ALL}")
+    
+    else:
+        print(f"ANON mode is {Fore.RED}NOT Active!{Style.RESET_ALL}\n\n")
+        
+        while True:
+            
+            ans = input(f"Press Enter to quit or type '{Fore.CYAN}private{Style.RESET_ALL}' to continue with\nANON mode setup. ")
+            
+            if ans == "private":
+                privateSetup()
+                break
+            elif ans == "":
+                break
+            else:
+                print(f"Invalid answer")
+            
+def privateSetup():
+    cronPayFound = False
+    clear()
+    print(f"Welcome the the ANON Mode setup wizard.")
+    
+    makeAnonAddress()
+    
+    addr = getNewStealthAddr()
+    setRewardAddress(addr)
+    cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cronpay"
+    print("Setting up cron job")
+    cron = CronTab(user=True)
+    for job in cron:
+        if cmdPay in str(job):
+            print(f"cron job found, skipping")
+            cronPayFound = True
+            
+    if cronPayFound == False:
+        try:
+            job = cron.new(command=cmdPay)
+            job.minute.every(15)
+            cron.write()
+            print("Cron successfully set.\n")
+            
+        except Exception as e:
+            showError(e)
+    
+    dInfo = daemonInfo()
+    dInfo['anonMode'] = True
+    dInfo['internalAnon'] = addr
+    updateDaemonInfo(dInfo)
+    
+    print(f"ANON mode successfully activated!")
+
+def cronPayment():
+    if daemonInfo()['anonRewardAddress'] == "" or validateAddress(daemonInfo()['anonRewardAddress']) == False:
+        return
+    balance = getBalances()['mine']['trusted']
+    
+    if isStealthAddr(daemonInfo()['anonRewardAddress']) == True:
+        payee = daemonInfo()['anonRewardAddress']
+        ptype = "ext anon"
+    else:
+        payee = daemonInfo()['internalAnon']
+        ptype = "int anon"
+    
+    if balance >= 0.1:
+        try:
+            txid = rpcproxy().sendtypeto("ghost", "anon", [{"address": payee, "amount": balance, "subfee": True}])
+        except Exception as e:
+            showError(e)
+        
+        with open("payment.log", "a") as f:
+            f.write(f"{datetime.utcnow()} TYPE: {ptype} TXID: {txid} AMOUNT: {balance}\n")
+            
+    anonBalance = getBalances()['mine']['anon_trusted']
+    
+    if anonBalance >= 0.1:
+        try:
+            txid = rpcproxy().sendtypeto("anon", "ghost", [{"address": f"{daemonInfo()['anonRewardAddress']}", "amount": anonBalance, "subfee": True}])
+        except Exception as e:
+            showError(e)
+        
+        with open("payment.log", "a") as f:
+            f.write(f"{datetime.utcnow()} TYPE: ext pub TXID: {txid} AMOUNT: {anonBalance}\n")
+
 def status():
     clear()
-    repo = git.Repo(os.path.expanduser("~/GhostVault"))
-    repo.remotes.origin.pull()
+    tnow = time.time()
+    day = 86400
+    day = tnow - day
+    filter = rpcproxy().filtertransactions({"from":int(day), "to":int(tnow),"count":100000,"category":"stake","collate":True,"include_watchonly":True,"with_reward":True})
     
-    print(f"{Fore.BLUE}#{Fore.WHITE}"*80 + "\n")
+    print(f"{Fore.BLUE}#{Style.RESET_ALL}"*80)
 
     print(f"GhostVault {version}")
-    print(f"Hostname                        : {Fore.GREEN}{platform.node()}{Fore.WHITE}")
-    print(f"Uptime/Load Average             : {Fore.GREEN}{str(timedelta(seconds=uptime())).split('.')[0]}, {getLoad()[0]} {getLoad()[1]} {getLoad()[2]}{Fore.WHITE}")
+    print(f"Hostname                        : {Fore.GREEN}{platform.node()}{Style.RESET_ALL}")
+    print(f"Uptime/Load Average             : {Fore.GREEN}{str(timedelta(seconds=uptime())).split('.')[0]}, {getLoad()[0]} {getLoad()[1]} {getLoad()[2]}{Style.RESET_ALL}")
+    
+    if daemonInfo()['anonMode'] == True:
+        print(f"privacy mode                    : {Fore.GREEN}ANON{Style.RESET_ALL}")
+    elif isStealthAddr(daemonInfo()['rewardAddress']) == True:
+        print(f"privacy mode                    : {Fore.YELLOW}ENHANCED{Style.RESET_ALL}")
+    else:
+        print(f"privacy mode                    : {Fore.RED}NORMAL{Style.RESET_ALL}")
     
     if checkConnect() == False:
-        print(f"ghostd version                  : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd up-to-date               : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd running                  : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd uptime                   : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd responding (RPC)         : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd connecting (peers)       : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd blocks synced            : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"last block (local ghostd)       : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"   (explorer.myghost.org)       : {Fore.GREEN}{getExplorerHeight()}{Fore.WHITE}")
-        print(f"ghostd is good chain            : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd staking enabled          : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd staking currently?       : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd staking difficulty       : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd network stakeweight      : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
-        print(f"ghostd staked amount            : {Fore.RED}DAEMON NOT CONNECTED{Fore.WHITE}")
+        print(f"ghostd version                  : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"ghostd up-to-date               : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"ghostd running                  : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"ghostd uptime                   : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"ghostd responding (RPC)         : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"ghostd connecting (peers)       : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"ghostd blocks synced            : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"last block (local ghostd)       : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"   (explorer.myghost.org)       : {Fore.GREEN}{getExplorerHeight()}{Style.RESET_ALL}")
+        print(f"ghostd is good chain            : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"ghostd staking enabled          : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"ghostd staking currently?       : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"ghostd staking difficulty       : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"ghostd network stakeweight      : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"currently staking               : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"total in coldstaking            : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
+        print(f"stakes/earned last 24h          : {Fore.RED}DAEMON NOT CONNECTED{Style.RESET_ALL}")
     
     elif isUpToDate() == False:
-        print(f"ghostd version                  : {Fore.RED}{getNetworkInfo()['subversion'].split(':')[1].replace('/', '')}{Fore.WHITE}")
-        print(f"ghostd up-to-date               : {Fore.RED}NO{Fore.WHITE}")
-        print(f"ghostd running                  : {Fore.GREEN}YES{Fore.WHITE}")
-        print(f"ghostd uptime                   : {Fore.GREEN}{str(timedelta(seconds=getUptime())).split('.')[0]}{Fore.WHITE}")
-        print(f"ghostd responding (RPC)         : {Fore.GREEN}YES{Fore.WHITE}")
+        print(f"ghostd version                  : {Fore.RED}{getNetworkInfo()['subversion'].split(':')[1].replace('/', '')}{Style.RESET_ALL}")
+        print(f"ghostd up-to-date               : {Fore.RED}NO{Style.RESET_ALL}")
+        print(f"ghostd running                  : {Fore.GREEN}YES{Style.RESET_ALL}")
+        print(f"ghostd uptime                   : {Fore.GREEN}{str(timedelta(seconds=getUptime())).split('.')[0]}{Style.RESET_ALL}")
+        print(f"ghostd responding (RPC)         : {Fore.GREEN}YES{Style.RESET_ALL}")
         
         if getPeerCount() == 0:
-            print(f"ghostd connecting (peers)       : {Fore.RED}{getPeerCount()}{Fore.WHITE}")
+            print(f"ghostd connecting (peers)       : {Fore.RED}{getPeerCount()}{Style.RESET_ALL}")
         else:
-            print(f"ghostd connecting (peers)       : {Fore.GREEN}{getPeerCount()}{Fore.WHITE}")
+            print(f"ghostd connecting (peers)       : {Fore.GREEN}{getPeerCount()}{Style.RESET_ALL}")
         
         if isSyncing() == True:
-            print(f"ghostd blocks synced            : {Fore.RED}NO{Fore.WHITE}")
-            print(f"last block (local ghostd)       : {Fore.RED}{getBlockHeight()}{Fore.WHITE}")
+            print(f"ghostd blocks synced            : {Fore.RED}NO{Style.RESET_ALL}")
+            print(f"last block (local ghostd)       : {Fore.RED}{getBlockHeight()}{Style.RESET_ALL}")
         else:
-            print(f"ghostd blocks synced            : {Fore.GREEN}YES{Fore.WHITE}")
-            print(f"last block (local ghostd)       : {Fore.GREEN}{getBlockHeight()}{Fore.WHITE}")
+            print(f"ghostd blocks synced            : {Fore.GREEN}YES{Style.RESET_ALL}")
+            print(f"last block (local ghostd)       : {Fore.GREEN}{getBlockHeight()}{Style.RESET_ALL}")
             
-        print(f"   (explorer.myghost.org)       : {Fore.GREEN}{getExplorerHeight()}{Fore.WHITE}")
+        print(f"   (explorer.myghost.org)       : {Fore.GREEN}{getExplorerHeight()}{Style.RESET_ALL}")
         
         if isBadFork() == True:
-            print(f"ghostd is good chain            : {Fore.RED}NO{Fore.WHITE}")
+            print(f"ghostd is good chain            : {Fore.RED}NO{Style.RESET_ALL}")
         else:
-            print(f"ghostd is good chain            : {Fore.GREEN}YES{Fore.WHITE}")
+            print(f"ghostd is good chain            : {Fore.GREEN}YES{Style.RESET_ALL}")
         
         if getStakingInfo()['enabled'] == False:
-            print(f"ghostd staking enabled          : {Fore.RED}NO{Fore.WHITE}")
+            print(f"ghostd staking enabled          : {Fore.RED}NO{Style.RESET_ALL}")
         else:
-            print(f"ghostd staking enabled          : {Fore.GREEN}YES - {getStakingInfo()['percentyearreward']}%{Fore.WHITE}")
+            print(f"ghostd staking enabled          : {Fore.GREEN}YES - {getStakingInfo()['percentyearreward']}%{Style.RESET_ALL}")
             
         if getStakingInfo()['staking'] == False and getStakingInfo()['enabled'] == False:
-            print(f"ghostd staking currently?       : {Fore.RED}NO{Fore.WHITE}")
+            print(f"ghostd staking currently?       : {Fore.RED}NO{Style.RESET_ALL}")
         
         elif getStakingInfo()['staking'] == False and getStakingInfo()['enabled'] == True:
             if 'cause' in getStakingInfo():
-                print(f"ghostd staking currently?       : {Fore.RED}NO - {getStakingInfo()['cause']}{Fore.WHITE}")
+                print(f"ghostd staking currently?       : {Fore.RED}NO - {getStakingInfo()['cause']}{Style.RESET_ALL}")
             else:
-                print(f"ghostd staking currently?       : {Fore.RED}NO{Fore.WHITE}")
+                print(f"ghostd staking currently?       : {Fore.RED}NO{Style.RESET_ALL}")
         
         else:
-            print(f"ghostd staking currently?       : {Fore.GREEN}YES{Fore.WHITE}")
+            print(f"ghostd staking currently?       : {Fore.GREEN}YES{Style.RESET_ALL}")
             
-        print(f"ghostd staking difficulty       : {Fore.GREEN}{getStakingInfo()['difficulty']}{Fore.WHITE}")
-        print(f"ghostd network stakeweight      : {Fore.GREEN}{convertFromSat(getStakingInfo()['netstakeweight']):,}{Fore.WHITE}")
+        print(f"ghostd staking difficulty       : {Fore.GREEN}{getStakingInfo()['difficulty']}{Style.RESET_ALL}")
+        print(f"ghostd network stakeweight      : {Fore.GREEN}{convertFromSat(getStakingInfo()['netstakeweight']):,}{Style.RESET_ALL}")
         
-        if getColdStakingInfo()['coin_in_coldstakeable_script'] == 0:
-            print(f"ghostd staked amount            : {Fore.RED}0{Fore.WHITE}")
+        if getColdStakingInfo()['currently_staking'] == 0:
+            print(f"currently staking               : {Fore.RED}0{Style.RESET_ALL}")
         else:
-            print(f"ghostd staked amount            : {Fore.GREEN}{getColdStakingInfo()['coin_in_coldstakeable_script']}{Fore.WHITE}")
+            print(f"currently staking               : {Fore.GREEN}{getColdStakingInfo()['currently_staking']}{Style.RESET_ALL}")
+            
+        if getColdStakingInfo()['coin_in_coldstakeable_script'] == 0:
+            print(f"total in coldstaking            : {Fore.RED}0{Style.RESET_ALL}")
+        else:
+            print(f"total in coldstaking            : {Fore.GREEN}{getColdStakingInfo()['coin_in_coldstakeable_script']}{Style.RESET_ALL}")
+            
+        if filter['collated']['records'] == 0:
+            print(f"stakes/earned last 24h          : {Fore.RED}0{Style.RESET_ALL}/{Fore.RED}0{Style.RESET_ALL}")
+        else:
+            print(f"stakes/earned last 24h          : {Fore.GREEN}{filter['collated']['records']}{Style.RESET_ALL}/{Fore.GREEN}{filter['collated']['total_reward']}{Style.RESET_ALL}")
             
             
     
     else:
-        print(f"ghostd version                  : {Fore.GREEN}{getNetworkInfo()['subversion'].split(':')[1].replace('/', '')}{Fore.WHITE}")
-        print(f"ghostd up-to-date               : {Fore.GREEN}YES{Fore.WHITE}")
-        print(f"ghostd running                  : {Fore.GREEN}YES{Fore.WHITE}")
-        print(f"ghostd uptime                   : {Fore.GREEN}{str(timedelta(seconds=getUptime())).split('.')[0]}{Fore.WHITE}")
-        print(f"ghostd responding (RPC)         : {Fore.GREEN}YES{Fore.WHITE}")
+        print(f"ghostd version                  : {Fore.GREEN}{getNetworkInfo()['subversion'].split(':')[1].replace('/', '')}{Style.RESET_ALL}")
+        print(f"ghostd up-to-date               : {Fore.GREEN}YES{Style.RESET_ALL}")
+        print(f"ghostd running                  : {Fore.GREEN}YES{Style.RESET_ALL}")
+        print(f"ghostd uptime                   : {Fore.GREEN}{str(timedelta(seconds=getUptime())).split('.')[0]}{Style.RESET_ALL}")
+        print(f"ghostd responding (RPC)         : {Fore.GREEN}YES{Style.RESET_ALL}")
         
         if getPeerCount() == 0:
-            print(f"ghostd connecting (peers)       : {Fore.RED}{getPeerCount()}{Fore.WHITE}")
+            print(f"ghostd connecting (peers)       : {Fore.RED}{getPeerCount()}{Style.RESET_ALL}")
         else:
-            print(f"ghostd connecting (peers)       : {Fore.GREEN}{getPeerCount()}{Fore.WHITE}")
+            print(f"ghostd connecting (peers)       : {Fore.GREEN}{getPeerCount()}{Style.RESET_ALL}")
             
         if isSyncing() == True:
-            print(f"ghostd blocks synced            : {Fore.RED}NO{Fore.WHITE}")
-            print(f"last block (local ghostd)       : {Fore.RED}{getBlockHeight()}{Fore.WHITE}")
+            print(f"ghostd blocks synced            : {Fore.RED}NO{Style.RESET_ALL}")
+            print(f"last block (local ghostd)       : {Fore.RED}{getBlockHeight()}{Style.RESET_ALL}")
         else:
-            print(f"ghostd blocks synced            : {Fore.GREEN}YES{Fore.WHITE}")
-            print(f"last block (local ghostd)       : {Fore.GREEN}{getBlockHeight()}{Fore.WHITE}")
+            print(f"ghostd blocks synced            : {Fore.GREEN}YES{Style.RESET_ALL}")
+            print(f"last block (local ghostd)       : {Fore.GREEN}{getBlockHeight()}{Style.RESET_ALL}")
         
-        print(f"   (explorer.myghost.org)       : {Fore.GREEN}{getExplorerHeight()}{Fore.WHITE}")
+        print(f"   (explorer.myghost.org)       : {Fore.GREEN}{getExplorerHeight()}{Style.RESET_ALL}")
         
         if isBadFork() == True:
-            print(f"ghostd is good chain            : {Fore.RED}NO{Fore.WHITE}")
+            print(f"ghostd is good chain            : {Fore.RED}NO{Style.RESET_ALL}")
         else:
-            print(f"ghostd is good chain            : {Fore.GREEN}YES{Fore.WHITE}")
+            print(f"ghostd is good chain            : {Fore.GREEN}YES{Style.RESET_ALL}")
         
         if getStakingInfo()['enabled'] == False:
-            print(f"ghostd staking enabled          : {Fore.RED}NO{Fore.WHITE}")
+            print(f"ghostd staking enabled          : {Fore.RED}NO{Style.RESET_ALL}")
         else:
-            print(f"ghostd staking enabled          : {Fore.GREEN}YES - {getStakingInfo()['percentyearreward']}%{Fore.WHITE}")
+            print(f"ghostd staking enabled          : {Fore.GREEN}YES - {getStakingInfo()['percentyearreward']}%{Style.RESET_ALL}")
         
         if getStakingInfo()['staking'] == False and getStakingInfo()['enabled'] == False:
-            print(f"ghostd staking currently?       : {Fore.RED}NO{Fore.WHITE}")
+            print(f"ghostd staking currently?       : {Fore.RED}NO{Style.RESET_ALL}")
         
         elif getStakingInfo()['staking'] == False and getStakingInfo()['enabled'] == True:
             if 'cause' in getStakingInfo():
-                print(f"ghostd staking currently?       : {Fore.RED}NO - {getStakingInfo()['cause']}{Fore.WHITE}")
+                print(f"ghostd staking currently?       : {Fore.RED}NO - {getStakingInfo()['cause']}{Style.RESET_ALL}")
             else:
-                print(f"ghostd staking currently?       : {Fore.RED}NO{Fore.WHITE}")
+                print(f"ghostd staking currently?       : {Fore.RED}NO{Style.RESET_ALL}")
         
         else:
-            print(f"ghostd staking currently?       : {Fore.GREEN}YES{Fore.WHITE}")
+            print(f"ghostd staking currently?       : {Fore.GREEN}YES{Style.RESET_ALL}")
             
-        print(f"ghostd staking difficulty       : {Fore.GREEN}{getStakingInfo()['difficulty']}{Fore.WHITE}")
-        print(f"ghostd network stakeweight      : {Fore.GREEN}{convertFromSat(getStakingInfo()['netstakeweight']):,}{Fore.WHITE}")
+        print(f"ghostd staking difficulty       : {Fore.GREEN}{getStakingInfo()['difficulty']}{Style.RESET_ALL}")
+        print(f"ghostd network stakeweight      : {Fore.GREEN}{convertFromSat(getStakingInfo()['netstakeweight']):,}{Style.RESET_ALL}")
         
+        if getColdStakingInfo()['currently_staking'] == 0:
+            print(f"currently staking               : {Fore.RED}0{Style.RESET_ALL}")
+        else:
+            print(f"currently staking               : {Fore.GREEN}{getColdStakingInfo()['currently_staking']}{Style.RESET_ALL}")
+            
         if getColdStakingInfo()['coin_in_coldstakeable_script'] == 0:
-            print(f"ghostd staked amount            : {Fore.RED}0{Fore.WHITE}")
+            print(f"total in coldstaking            : {Fore.RED}0{Style.RESET_ALL}")
         else:
-            print(f"ghostd staked amount            : {Fore.GREEN}{getColdStakingInfo()['coin_in_coldstakeable_script']}{Fore.WHITE}")
+            print(f"total in coldstaking            : {Fore.GREEN}{getColdStakingInfo()['coin_in_coldstakeable_script']}{Style.RESET_ALL}")
             
-    print("\n" + f"{Fore.BLUE}#{Fore.WHITE}"*80)
+        if filter['collated']['records'] == 0:
+            print(f"stakes/earned last 24h          : {Fore.RED}0{Style.RESET_ALL}/{Fore.RED}0{Style.RESET_ALL}")
+        else:
+            print(f"stakes/earned last 24h          : {Fore.GREEN}{filter['collated']['records']}{Style.RESET_ALL}/{Fore.GREEN}{filter['collated']['total_reward']}{Style.RESET_ALL}")
+            
+    print(f"{Fore.BLUE}#{Style.RESET_ALL}"*80)
     
-    
-    
-def makeRewardAddress():
+def makeAnonAddress():
     while True:
         clear()
+        print(f"If you use a stealth address funds will be sent directly to it.")
+        print(f"If you use a public address, funds will pass through your\ncoldstaking node's internal anon wallet before being sent to your public address\n")
         ans = input(f"Please enter the address that you wish to recieve block rewards at: ")
         
         if validateAddress(ans) == True:
-            print(f"You have selected to recieve rewards at: {ans}")
+            print(f"You have selected to recieve rewards at:\n{Fore.CYAN}{ans}{Style.RESET_ALL}\n")
+            confirm = input(f"Press Enter to confirm or enter anyting to try again.")
+            
+            if confirm == "":
+                setAnonAddress(ans)
+                break
+            else:
+                pass
+        else:
+            print(f"Not a valid Ghost address. Please try again.")
+
+def makeRewardAddress():
+    if daemonInfo()['anonMode'] == True:
+        clear()
+        print(f"ANON mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
+        print(f"Continuing will disable ANON mode.")
+        while True:
+            ans = input(f"Type '{Fore.CYAN}public{Style.RESET_ALL}' to continue or Enter to exit: ")
+            
+            if ans == 'public':
+                print(f"Continuing...")
+                break
+            elif ans == '':
+                print(f"Exiting...")
+                sys.exit()
+            else:
+                print(f"Unknown answer, please try again.")
+    
+    while True:
+        clear()
+        print(f"Using a stealth address will enable Enhanced Privacy.")
+        ans = input(f"Please enter the address that you wish to recieve block rewards at: ")
+        
+        if validateAddress(ans) == True:
+            print(f"You have selected to recieve rewards at: {Fore.CYAN}{ans}{Style.RESET_ALL}\n")
             confirm = input(f"Press Enter to confirm or enter anyting to try again.")
             
             if confirm == "":
                 setRewardAddress(ans)
+                if daemonInfo()['anonMode'] == True:
+                    dInfo = daemonInfo()
+                    dInfo['anonMode'] = False
+                    updateDaemonInfo(dInfo)
                 break
             else:
                 pass
@@ -837,20 +1089,19 @@ def help():
     print(f"GhostVault {version} Help text.")
     print(f"Usage: GhostVault.py [OPTION]\n\n")
     print(f"Options:\n")
-    print(f"{Fore.BLUE}status{Fore.WHITE}            :  Returns staking node status.")
-    print(f"{Fore.BLUE}quickstart{Fore.WHITE}        :  Runs the quickstart guide.")
-    print(f"{Fore.BLUE}start{Fore.WHITE}             :  Starts the ghost daemon.")
-    print(f"{Fore.BLUE}stop{Fore.WHITE}              :  Stops the ghost daemon.")
-    print(f"{Fore.BLUE}restart{Fore.WHITE}           :  Restarts the ghost daemon.")
-    print(f"{Fore.BLUE}rewardaddress{Fore.WHITE}     :  Returns current reward address.")
-    print(f"{Fore.BLUE}setrewardaddress{Fore.WHITE}  :  Sets new reward address.")
-    print(f"{Fore.BLUE}showextkey{Fore.WHITE}        :  Shows your extended public key.")
-    print(f"{Fore.BLUE}checkchain{Fore.WHITE}        :  Checks that ghostd is on the correct chain.")
-    print(f"{Fore.BLUE}forceresync{Fore.WHITE}       :  Forces ghostd to resync. Use in case of bad chain.")
-    print(f"{Fore.BLUE}update{Fore.WHITE}            :  Self updater for GhostVault and ghostd.")
+    print(f"{Fore.BLUE}status{Style.RESET_ALL}            :  Returns staking node status.")
+    print(f"{Fore.BLUE}quickstart{Style.RESET_ALL}        :  Runs the quickstart guide.")
+    print(f"{Fore.BLUE}start{Style.RESET_ALL}             :  Starts the ghost daemon.")
+    print(f"{Fore.BLUE}stop{Style.RESET_ALL}              :  Stops the ghost daemon.")
+    print(f"{Fore.BLUE}restart{Style.RESET_ALL}           :  Restarts the ghost daemon.")
+    print(f"{Fore.BLUE}rewardaddress{Style.RESET_ALL}     :  Returns current reward address.")
+    print(f"{Fore.BLUE}setrewardaddress{Style.RESET_ALL}  :  Sets new reward address.")
+    print(f"{Fore.BLUE}showextkey{Style.RESET_ALL}        :  Shows your extended public key.")
+    print(f"{Fore.BLUE}checkchain{Style.RESET_ALL}        :  Checks that ghostd is on the correct chain.")
+    print(f"{Fore.BLUE}forceresync{Style.RESET_ALL}       :  Forces ghostd to resync. Use in case of bad chain.")
+    print(f"{Fore.BLUE}update{Style.RESET_ALL}            :  Self updater for GhostVault and ghostd.")
 
 def main():
-    
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower()
         if arg == "help":
@@ -863,22 +1114,20 @@ def main():
             restartDaemon()
             if isSyncing() == True:
                 syncProgress()
-            loadWallet(daemonInfo()['walletName'])
         
         elif arg == "start":
             startDaemon()
             if isSyncing() == True:
                 syncProgress()
-            loadWallet(daemonInfo()['walletName'])
         
         elif arg == "stop":
             stopDaemon()
         
         elif arg == "rewardaddress":
             if getRewardAddressFromWallet() == None:
-                print(f"Reward address not set!\nPlease run '{Fore.CYAN}ghostVault.py setrewardaddress{Fore.WHITE}' to set a reward address.")
+                print(f"Reward address not set!\nPlease run '{Fore.CYAN}ghostVault.py setrewardaddress{Style.RESET_ALL}' to set a reward address.")
             else:
-                print(f"Your reward address is currently set to:\n\n{Fore.CYAN}{getRewardAddressFromWallet()}{Fore.WHITE}")
+                print(f"Your reward address is currently set to:\n\n{Fore.CYAN}{getRewardAddressFromWallet()}{Style.RESET_ALL}")
         
         elif arg == "setrewardaddress":
             makeRewardAddress()
@@ -888,10 +1137,10 @@ def main():
             key = daemonInfo()['extPubKey']
             
             if key == '':
-                print(f"Extended public key not set.\nPlease run '{Fore.CYAN}ghostVault.py quickstart{Fore.WHITE}' to set up your staking node.")
+                print(f"Extended public key not set.\nPlease run '{Fore.CYAN}ghostVault.py quickstart{Style.RESET_ALL}' to set up your staking node.")
             
             else:
-                print(f"Your extended public key is:\n\n{Fore.CYAN}{key}{Fore.WHITE}")
+                print(f"Your extended public key is:\n\n{Fore.CYAN}{key}{Style.RESET_ALL}")
         
         elif arg == "update":
             repo = git.Repo(os.path.expanduser("~/GhostVault"))
@@ -913,8 +1162,6 @@ def main():
                 prepareDataDir()
                 startDaemon()
                 
-                
-        
         elif arg == "checkchain":
             if isBadFork() == False:
                 print(f"You are on the correct chain!")
@@ -937,13 +1184,38 @@ def main():
         elif arg == "status":
             status()
         
+        elif arg == "private":
+            private()
+            
+        elif arg == 'stats':
+            getStats()
+        
+        elif arg == 'cronpay':
+            cronPayment()
+            
+        elif arg == 'anonaddress':
+            if daemonInfo()['anonMode'] == False:
+                print(f"ANON Mode not active!\nPlease run '{Fore.CYAN}ghostVault.py private{Style.RESET_ALL}' to activate ANON Mode.")
+            else:
+                print(f"Your anon reward address is currently set to:\n\n{Fore.CYAN}{daemonInfo()['anonRewardAddress']}{Style.RESET_ALL}")
+                
+        elif arg == 'setanonaddress':
+            if daemonInfo()['anonMode'] == False:
+                print(f"ANON Mode not active!\nPlease run '{Fore.CYAN}ghostVault.py private{Style.RESET_ALL}' to activate ANON Mode.")
+            else:
+                makeAnonAddress()
+                
+        elif arg == 'balance':
+            print(f"GhostVault {version} balances.\n")
+            
+            for i in getBalances()['mine']:
+                print(f"{i}: {getBalances()['mine'][i]}") 
+                
         else:
-            print(f"Unknown argument '{arg}'.\nPlease run '{Fore.CYAN}ghostVault.py help{Fore.WHITE}' for full list of commands.")
-        
-        
+            print(f"Unknown argument '{arg}'.\nPlease run '{Fore.CYAN}ghostVault.py help{Style.RESET_ALL}' for full list of commands.")
+                
     else:
         help()
-
 
 if __name__ == "__main__":
     main()
