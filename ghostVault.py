@@ -15,7 +15,7 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v0.6"
+version = "v0.7"
 
 def rpcproxy():
     rpcproxy = AuthServiceProxy('http://%s:%s@127.0.0.1:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT))
@@ -206,6 +206,8 @@ def getSystem():
     if arch == '':
         if platform.uname()[-2] == 'armv7l':
             arch = 'arm'
+        elif platform.uname()[-2] == 'aarch64':
+            arch = 'aarch64'
     return f'{arch}-{system}'
 
 def syncProgress():
@@ -214,6 +216,9 @@ def syncProgress():
         blocks = bcInfo['blocks']
         headers = bcInfo['headers']
         initialDl = bcInfo['initialblockdownload']
+        
+        if headers == 0 or getPeerCount() == 0:
+            continue
         
         progress = blocks / headers * 100
         
@@ -527,6 +532,7 @@ def quickstart():
                 sys.exit()
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
+                input("Press Enter to continue...")
                 
     clear()
     
@@ -650,6 +656,7 @@ def quickstart():
                 
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
+                input("Press Enter to continue...")
                 
     else:
         print(f"Generating new extended public key...")
@@ -682,6 +689,7 @@ def quickstart():
                 break
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
+                input("Press Enter to continue...")
     cronFound == False
     cmd = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py update"
     print("Setting up cron job")
@@ -783,6 +791,7 @@ def private():
                 break
             else:
                 print(f"Invalid answer")
+                input("Press Enter to continue...")
             
 def privateSetup():
     cronPayFound = False
@@ -1033,6 +1042,7 @@ def makeAnonAddress():
                 pass
         else:
             print(f"Not a valid Ghost address. Please try again.")
+            input("Press Enter to continue...")
 
 def makeRewardAddress():
     if daemonInfo()['anonMode'] == True:
@@ -1050,6 +1060,7 @@ def makeRewardAddress():
                 sys.exit()
             else:
                 print(f"Unknown answer, please try again.")
+                input("Press Enter to continue...")
     
     while True:
         clear()
@@ -1071,6 +1082,7 @@ def makeRewardAddress():
                 pass
         else:
             print(f"Not a valid Ghost address. Please try again.")
+            input("Press Enter to continue...")
 
 def waitForDaemon():
     count = 0
@@ -1100,6 +1112,12 @@ def help():
     print(f"{Fore.BLUE}checkchain{Style.RESET_ALL}        :  Checks that ghostd is on the correct chain.")
     print(f"{Fore.BLUE}forceresync{Style.RESET_ALL}       :  Forces ghostd to resync. Use in case of bad chain.")
     print(f"{Fore.BLUE}update{Style.RESET_ALL}            :  Self updater for GhostVault and ghostd.")
+    print(f"{Fore.BLUE}private{Style.RESET_ALL}           :  Checks privacy mode and initiates anon mode activation.")
+    print(f"{Fore.BLUE}stats{Style.RESET_ALL}             :  Basic staking stats.")
+    print(f"{Fore.BLUE}anonaddress{Style.RESET_ALL}       :  Shows the current payment address when in anon mode.")
+    print(f"{Fore.BLUE}setanonaddress{Style.RESET_ALL}    :  Sets new payment address when in anon mode.")
+    print(f"{Fore.BLUE}balance{Style.RESET_ALL}           :  Shows internal wallet balances.")
+    print(f"{Fore.BLUE}cronpay{Style.RESET_ALL}           :  Activates the payment processor. Used in a cron job.")
 
 def main():
     if len(sys.argv) > 1:
