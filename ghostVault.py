@@ -208,7 +208,7 @@ def getSystem():
     system = platform.system()
     arch = platform.processor()
     if arch == '':
-        if platform.uname()[-2] == 'armv7l':
+        if platform.uname()[-2] == 'armv7l' or platform.uname()[-2] == 'armv6l':
             arch = 'arm'
         elif platform.uname()[-2] == 'aarch64':
             arch = 'aarch64'
