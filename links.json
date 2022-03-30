@@ -1,15 +1,15 @@
 {
   "x86_64-Linux": {
-    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.9/ghost-0.21.1.9-x86_64-linux-gnu.tar.gz",
-    "hash": "aba235d2c6f8175dec3123d346f4f3ad4f77d7b8249bab3ee9442c406b3f8b40"
+    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.10/ghost-0.21.1.10-x86_64-pc-linux-gnu.tar.gz",
+    "hash": "d5d088d35a006f1d86025b85520ada9b531201807d34f7114720fd5169a094ce"
   },
   "arm-Linux": {
-    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.9/ghost-0.21.1.9-arm-linux-gnueabihf.tar.gz",
-    "hash": "8a51a92e1131128add348200158996c75df0635ad2040ed19d7470ebb78ae783"
+    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.10/ghost-0.21.1.10-arm-linux-gnueabihf.tar.gz",
+    "hash": "d721d35d672b19e2496e07d5e037db7e54be2919744003ad5cb5cb050ddff725"
   },
   "aarch64-Linux": {
-      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.9/ghost-0.21.1.9-aarch64-linux-gnu.tar.gz",
-      "hash": "73ac0de87a2109e6f33c0857d790aafc16dca13f53ad5709e39aa940c5b5a32c"
+      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.10/ghost-0.21.1.10-aarch64-linux-gnu.tar.gz",
+      "hash": "6172dc56df7cea03e7ede71c3cb57e5c56634c5785c0f8e23cfc6ebe2b00275e"
   },
-  "version": "0.21.1.9"
+  "version": "0.21.1.10"
 }
