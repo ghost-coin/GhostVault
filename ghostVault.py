@@ -1142,10 +1142,19 @@ def waitForDaemon():
 def waitForDaemonShutdown():
     print("Waiting for full daemon shutdown...")
     count = 0
+    pidFile = os.path.expanduser("~/.ghost/ghost.pid")
     while True:
         
-        if os.path.isfile(os.path.expanduser("~/.ghost/ghost.pid")):
-            pass
+        if os.path.isfile(pidFile):
+            with open(pidFile) as f:
+                pid = f.read()
+            
+            if psutil.pid_exists(int(pid)):
+                pass
+            else:
+                print(f"Unclean shutdown detected. Removing PID file.")
+                os.remove(pidFile)
+                break
         else:
             break
             
