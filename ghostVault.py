@@ -15,7 +15,7 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v0.7"
+version = "v0.8"
 
 def rpcproxy():
     rpcproxy = AuthServiceProxy('http://%s:%s@127.0.0.1:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT), timeout=120)
@@ -67,7 +67,7 @@ def getBlockChainInfo():
 def importKey(words):
     print("Building wallet from mnemonic words.")
     try:
-        rpcproxy().extkeyimportmaster(words)
+        rpcproxy().extkeyimportmaster(words, "", False, "", "", -1)
     except Exception as e:
         showError(e)
     print('Sucessfully imported mnemonic.')
@@ -120,7 +120,7 @@ def getKeysAvailable():
     
     for i in allKeys['chains']:
         keyDict = {"key": "", "label": ""}
-        if 'function' in i:
+        if 'function' in i or 'use_type' in i or i['receive_on'] == False or i['label'] == '': 
             continue
         
         keyDict['key'] = i['chain']
@@ -427,6 +427,7 @@ def stopDaemon():
         print("Daemon not running...")
     else:
         print(rpcproxy().stop())
+        waitForDaemonShutdown()
 
 def restartDaemon():
     print('Restarting daemon...')
@@ -796,9 +797,31 @@ def private():
 def privateSetup():
     cronPayFound = False
     clear()
-    print(f"Welcome the the ANON Mode setup wizard.")
+    print(f"Welcome the the ANON Mode setup wizard.\n")
+    print(f"Reward Address:\n{Fore.CYAN}{daemonInfo()['rewardAddress']}{Style.RESET_ALL}\n")
     
-    makeAnonAddress()
+    if isStealthAddr(daemonInfo()['rewardAddress']) == True:
+        atype = "Stealth"
+    else:
+        atype = "Public"
+    
+    print(f"Address Type: {atype}\n")
+    
+    print(f"If you use a stealth address funds will be sent directly to it.")
+    print(f"If you use a public address, funds will pass through your\ncoldstaking node's internal anon wallet before being sent to your public address\n")
+    while True:
+        ans = input(f"Would you like to use this address? {Fore.GREEN}Y/{Fore.RED}n{Style.RESET_ALL} ")
+        
+        if ans.lower() == 'y' or ans.lower() == '':
+            setAnonAddress(daemonInfo()['rewardAddress'])
+            break
+        elif ans.lower() == 'n':
+            makeAnonAddress()
+            break
+        else:
+            print("Invalid answer! Please enter either 'y' or 'n'")
+            input("Press Enter to continue...")
+
     
     addr = getNewStealthAddr()
     setRewardAddress(addr)
@@ -1093,8 +1116,23 @@ def waitForDaemon():
         if online == True:
             break
         
-        if count == 20:
+        if count == 40:
             showError("Daemon Failed to start")
+        count += 1
+
+def waitForDaemonShutdown():
+    print("Waiting for full daemon shutdown...")
+    count = 0
+    while True:
+        time.sleep(3)
+        
+        if os.path.isfile(os.path.expanduser("~/.ghost/ghost.pid")):
+            pass
+        else:
+            break
+            
+        if count == 40:
+            showError("Shutdown error. Please try again.")
         count += 1
 
 def help():
