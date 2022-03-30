@@ -691,7 +691,9 @@ def quickstart():
                 print("Invalid answer! Please enter either 'y' or 'n'")
                 input("Press Enter to continue...")
     cronFound = False
+    cronBoot = False
     cmd = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py update"
+    cmdBoot = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py start"
     print("Setting up cron job")
     cron = CronTab(user=True)
     for job in cron:
@@ -699,16 +701,28 @@ def quickstart():
             print(f"cron job found, skipping")
             cronFound = True
             
+        elif cmdBoot in str(job):
+            print(f"cron job found, skipping")
+            cronBoot = True
+            
     if cronFound == False:
         try:
             job3 = cron.new(command=cmd)
             job3.hour.every(2)
             cron.write()
-            print("Cron successfully set.\n")
             
         except Exception as e:
             showError(e)
     
+    if cronBoot == False:
+        try:
+            job4 = cron.new(command=cmdBoot)
+            job4.every_reboot()
+            cron.write()
+            
+        except Exception as e:
+            showError(e)
+    print("Cron successfully set.\n")
     print(f"Quick start success!")
     dInfo = daemonInfo()
     dInfo['firstRun'] = False
@@ -775,7 +789,7 @@ def private():
     
     if daemonInfo()['anonMode'] == True:
         print(f"ANON mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
-        print(f"You can run '{Fore.CYAN}ghostVault.py setrewardaddress' to disable this mode.{Style.RESET_ALL}")
+        print(f"You can run '{Fore.CYAN}ghostVault.py setrewardaddress{Style.RESET_ALL}' to disable this mode.")
     
     else:
         print(f"ANON mode is {Fore.RED}NOT Active!{Style.RESET_ALL}\n\n")
@@ -1123,7 +1137,6 @@ def waitForDaemonShutdown():
     print("Waiting for full daemon shutdown...")
     count = 0
     while True:
-        time.sleep(3)
         
         if os.path.isfile(os.path.expanduser("~/.ghost/ghost.pid")):
             pass
@@ -1133,6 +1146,7 @@ def waitForDaemonShutdown():
         if count == 40:
             showError("Shutdown error. Please try again.")
         count += 1
+        time.sleep(3)
 
 def help():
     print(f"GhostVault {version} Help text.")
