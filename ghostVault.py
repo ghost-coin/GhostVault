@@ -701,8 +701,8 @@ def quickstart():
             
     if cronFound == False:
         try:
-            job = cron.new(command=cmd)
-            job.minute.every(60)
+            job3 = cron.new(command=cmd)
+            job3.minute.every(60)
             cron.write()
             print("Cron successfully set.\n")
             
@@ -834,8 +834,8 @@ def privateSetup():
             
     if cronPayFound == False:
         try:
-            job = cron.new(command=cmdPay)
-            job.minute.every(15)
+            job3 = cron.new(command=cmdPay)
+            job3.minute.every(15)
             cron.write()
             print("Cron successfully set.\n")
             
