@@ -128,11 +128,15 @@ def getKeysAvailable():
         keys.append(keyDict)
     return keys
 
-def setRewardAddress(rewardAddress):
+def setRewardAddress(rewardAddress, anon=False):
     if validateAddress(rewardAddress) == False:
         showError(f"Invalid Ghost address: {rewardAddress}")
-        
-    print(f"Setting reward address to: {Fore.CYAN}{rewardAddress}{Style.RESET_ALL}...")
+    
+    if anon == True:
+        print(f"Setting reward address to: {Fore.CYAN}<Internal Stealth Address>{Style.RESET_ALL}...")
+    
+    else:
+        print(f"Setting reward address to: {Fore.CYAN}{rewardAddress}{Style.RESET_ALL}...")
     
     try:
         rpcproxy().walletsettings("stakingoptions", {"rewardaddress": rewardAddress})
@@ -839,7 +843,7 @@ def privateSetup():
 
     
     addr = getNewStealthAddr()
-    setRewardAddress(addr)
+    setRewardAddress(addr, anon=True)
     cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cronpay"
     print("Setting up cron job")
     cron = CronTab(user=True)
@@ -1173,6 +1177,9 @@ def help():
     print(f"{Fore.BLUE}cronpay{Style.RESET_ALL}           :  Activates the payment processor. Used in a cron job.")
 
 def main():
+    if checkConnect == False:
+        print(f"Daemon not running, attempting to start")
+        startDaemon()
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower()
         if arg == "help":
