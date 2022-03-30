@@ -3,7 +3,7 @@ Ghost coin cold staking node managment interface
 
 Setup walkthrough:
 
-This guide is for Ubuntu/Deabian based systems. Other systems to come.
+This guide is for Ubuntu/Debian based systems. Other systems to come.
 
 To start with, any currenty running instances of ghostd will need to be stopped before continuing with this guide.
 
