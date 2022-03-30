@@ -710,6 +710,7 @@ def quickstart():
             job3 = cron.new(command=cmd)
             job3.hour.every(2)
             cron.write()
+            print("Update cron successfully set.\n")
             
         except Exception as e:
             showError(e)
@@ -719,10 +720,11 @@ def quickstart():
             job4 = cron.new(command=cmdBoot)
             job4.every_reboot()
             cron.write()
+            print("Start on boot cron successfully set.\n")
             
         except Exception as e:
             showError(e)
-    print("Cron successfully set.\n")
+            
     print(f"Quick start success!")
     dInfo = daemonInfo()
     dInfo['firstRun'] = False
