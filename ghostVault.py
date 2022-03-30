@@ -427,13 +427,11 @@ def stopDaemon():
         print("Daemon not running...")
     else:
         print(rpcproxy().stop())
-        waitForDaemonShutdown()
 
 def restartDaemon():
     print('Restarting daemon...')
     stopDaemon()
-    print("Waiting 5 seconds for daemon shutdown...")
-    time.sleep(5)
+    waitForDaemonShutdown()
     startDaemon()
 
 def removeDaemon():
@@ -497,6 +495,7 @@ def quickstart():
     input("Press Enter to continue...")
     
     stopDaemon()
+    waitForDaemonShutdown()
     downloadDaemon()
     extractDaemon()
     prepareDataDir()
@@ -703,7 +702,7 @@ def quickstart():
     if cronFound == False:
         try:
             job = cron.new(command=cmd)
-            job.hour.every(1)
+            job.minute.every(60)
             cron.write()
             print("Cron successfully set.\n")
             
@@ -1211,6 +1210,7 @@ def main():
             else:
                 print(f"ghostd is out of date! Updating...")
                 stopDaemon()
+                waitForDaemonShutdown()
                 removeArchive()
                 removeDaemon()
                 downloadDaemon()
@@ -1227,6 +1227,7 @@ def main():
         elif arg == "forceresync":
             print("Forcing resync...")
             stopDaemon()
+            waitForDaemonShutdown()
             clearBlocks()
             time.sleep(5)
             startDaemon()
