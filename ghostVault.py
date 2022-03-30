@@ -702,7 +702,7 @@ def quickstart():
     if cronFound == False:
         try:
             job3 = cron.new(command=cmd)
-            job3.hour.every(1)
+            job3.hour.every(2)
             cron.write()
             print("Cron successfully set.\n")
             
