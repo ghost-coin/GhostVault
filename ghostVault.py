@@ -441,7 +441,7 @@ def restartDaemon():
 def removeDaemon():
     if daemonInfo()['ghostdPath'] == "":
         return
-    elif os.path.isdir(daemonInfo()['ghostdPath']) == False:
+    elif os.path.isfile(daemonInfo()['ghostdPath']) == False:
         return
     daemonDir = f"{daemonInfo()['ghostdPath'].split('/')[1]}/"
     stopDaemon()
