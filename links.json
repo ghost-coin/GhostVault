@@ -1,6 +1,6 @@
 {
   "x86_64-Linux": {
-    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.10/ghost-0.21.1.10-x86_64-pc-linux-gnu.tar.gz",
+    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.10/ghost-0.21.1.10-x86_64-inux-gnu.tar.gz",
     "hash": "d5d088d35a006f1d86025b85520ada9b531201807d34f7114720fd5169a094ce"
   },
   "arm-Linux": {
