@@ -23,7 +23,7 @@ def rpcproxy():
 
 def checkConnect():
     try:
-        rpcproxy().uptime()
+        rpcproxy().getblockchaininfo()
         return True
     except:
         return False
@@ -212,6 +212,8 @@ def getSystem():
             arch = 'arm'
         elif platform.uname()[-2] == 'aarch64':
             arch = 'aarch64'
+        elif platform.uname()[-2] == 'x86_64':
+            arch = 'x86_64'
     return f'{arch}-{system}'
 
 def syncProgress():
