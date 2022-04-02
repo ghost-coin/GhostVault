@@ -1,7 +1,7 @@
 **VPS Setup**
 
 This guide is for setting up and securing a vps. This guide assumes that you have ssh access to a vps on the root account.
-This guide also is for Ubuntu based systems. Other Linux systems shopuld be similar.
+This guide also is for Ubuntu based systems. Other Linux systems should be similar.
 You can follow the first part of the guide found [here](https://ghostveterans.com/vps/)
 
 **1. Creating a User account with sudo access**
@@ -17,7 +17,7 @@ adduser tux
 After this it will ask you to put a new password in twice. This is an important password.
 The rest of the fields can be left blank.
 
-Once you have your new user made, let's give it sudo access so that you can do root level tasks, form a more secure user account.
+Once you have your new user made, let's give it sudo access so that you can do root level tasks, from a more secure user account.
 
 This can be done as follows
 
@@ -70,7 +70,7 @@ You should now be logged in as the user you made.
 
 **4. Secure ssh**
 
-ssh is great secure tool for accessing a shell form across a network. However ssh is heavily targeted and attacked.
+ssh is a great, secure, tool for accessing a shell from across a network. However ssh is heavily targeted and attacked.
 The root user is the most targeted name, as well as names such as admin. The attackers will try ot log in as these users, trying passwords from large
 dictionaries of common passwords. We are going to mitigate these threats by disabling logging into the root account. This means that they will not have 
 direct access to root and this will stop all attempts to login using the root user. The next is we will install a package called fail2ban.
