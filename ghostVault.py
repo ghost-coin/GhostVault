@@ -511,7 +511,6 @@ def quickstart():
     except:
         pass
     
-    
     if isSyncing() == True:
         syncProgress()
     
@@ -522,8 +521,9 @@ def quickstart():
             ans = input(f"Would you like to resync to the correct chain? {Fore.GREEN}Y/{Fore.RED}n{Style.RESET_ALL} ")
             
             if ans.lower() == 'y' or ans.lower() == '':
-                print("Farcing resync...")
+                print("Forcing resync...")
                 stopDaemon()
+                waitForDaemonShutdown()
                 clearBlocks()
                 startDaemon()
                 if isSyncing() == True:
@@ -597,7 +597,6 @@ def quickstart():
                     else:
                         walletName = getWallets()[int(walletIndex)-1]
                         break
-                        
                 
                 dInfo = daemonInfo()
                 dInfo['walletName'] = walletName
@@ -609,7 +608,6 @@ def quickstart():
                 newWallet = False
                 break
                     
-                
             elif ans.lower() == 'n':
                 makeWallet()
                 break
@@ -646,7 +644,6 @@ def quickstart():
                         extLabel = keys[int(keyIndex)-1]['label']
                         break
                         
-                
                 dInfo = daemonInfo()
                 dInfo['extPubKey'] = extKey
                 dInfo['extPubKeyLabel'] = extLabel
@@ -704,11 +701,11 @@ def quickstart():
     cron = CronTab(user=True)
     for job in cron:
         if cmd in str(job):
-            print(f"cron job found, skipping")
+            print(f"Update cron found, skipping")
             cronFound = True
             
         elif cmdBoot in str(job):
-            print(f"cron job found, skipping")
+            print(f"Start on boot cron found, skipping")
             cronBoot = True
             
     if cronFound == False:
@@ -843,7 +840,6 @@ def privateSetup():
             print("Invalid answer! Please enter either 'y' or 'n'")
             input("Press Enter to continue...")
 
-    
     addr = getNewStealthAddr()
     setRewardAddress(addr, anon=True)
     cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cronpay"
@@ -1113,7 +1109,7 @@ def makeRewardAddress():
         
         if validateAddress(ans) == True:
             print(f"You have selected to recieve rewards at: {Fore.CYAN}{ans}{Style.RESET_ALL}\n")
-            confirm = input(f"Press Enter to confirm or enter anyting to try again.")
+            confirm = input(f"Press Enter to confirm or enter anything to try again.")
             
             if confirm == "":
                 setRewardAddress(ans)
