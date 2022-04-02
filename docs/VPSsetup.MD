@@ -125,8 +125,7 @@ back to a computer that the server has the keys for.
 
 With that said, this step is highly recomended.
 
-This guide will be going over the instructions for Linux and Mac users. Putty users should refer to the guide found 
-[here](https://www.ssh.com/academy/ssh/putty/windows/puttygen)
+This guide will be going over the instructions for Linux and Mac users. Putty users should refer to the guide found [here](https://www.ssh.com/academy/ssh/putty/windows/puttygen)
 
 To start with type `exit` to close the ssh session.
 Now we need to generate our ssh keys. To do this do
@@ -258,7 +257,7 @@ For this we will use the cron service to schedule the task. To do this
 sudo crontab -e
 ```
 
-Enter your password, then it will ask you what editor you want to use, choose #1 for nano.
+Enter your password, then it will ask you what editor you want to use, choose 1 for nano.
 
 Now use the arrow keys to scroll to the bottom of the file.
 

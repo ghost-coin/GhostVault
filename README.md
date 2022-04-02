@@ -3,6 +3,8 @@ Ghost coin cold staking node managment interface
 
 Setup walkthrough:
 
+Start by securing your server using the guide found [here](https://github.com/bleach86/GhostVault/blob/main/docs/VPSsetup.MD)
+
 This guide is for Ubuntu/Debian based systems. Other systems to come.
 
 To start with, any currenty running instances of ghostd will need to be stopped before continuing with this guide.
