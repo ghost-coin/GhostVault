@@ -3,10 +3,20 @@ Ghost coin cold staking node managment interface
 
 Setup walkthrough:
 
-Start by securing your server using the guide found [here](https://github.com/bleach86/GhostVault/blob/main/docs/VPSsetup.MD)
-
 This guide is for Ubuntu/Debian based systems. Other systems to come.
 
+Sart with with this VPS setup guide [here](https://ghostveterans.com/vps/)
+
+The first section 'VPS Provider & Setup' is for setting up a vps with the provider 'Vultr.com'
+you can use this one, or any you like. Make sure the system is Ubuntu 20.04 and 2gb of ram.
+
+The next part in that guide 'Connecting to your VPS' is for getting a ssh connection.
+
+After that part secure your server using the guide found [here](https://github.com/bleach86/GhostVault/blob/main/docs/VPSsetup.MD)
+
+Once your server is secured, return back here and continue with this guide.
+
+#####################################################################################################################
 To start with, any currenty running instances of ghostd will need to be stopped before continuing with this guide.
 
 Now that there is no instance of ghostd running we can continue.
