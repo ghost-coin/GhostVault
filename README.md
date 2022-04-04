@@ -33,7 +33,7 @@ sudo apt install python3-pip git
 Clone the repository:
 
 ```
-cd && git clone https://github.com/bleach86/GhostVault && cd GhostVault/
+cd && git clone https://github.com/ghost-coin/GhostVault && cd GhostVault/
 ```
 
 Install the python modules:
