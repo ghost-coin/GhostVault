@@ -16,7 +16,7 @@ After that part secure your server using the guide found [here](https://github.c
 
 Once your server is secured, return back here and continue with this guide.
 
-#####################################################################################################################
+#############################################################################################
 To start with, any currenty running instances of ghostd will need to be stopped before continuing with this guide.
 
 Now that there is no instance of ghostd running we can continue.
