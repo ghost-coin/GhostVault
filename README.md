@@ -3,11 +3,21 @@ Ghost coin cold staking node managment interface
 
 Setup walkthrough:
 
-Start by securing your server using the guide found [here](https://github.com/bleach86/GhostVault/blob/main/docs/VPSsetup.MD)
-
 This guide is for Ubuntu/Debian based systems. Other systems to come.
 
-To start with, any currenty running instances of ghostd will need to be stopped before continuing with this guide.
+Sart with with this VPS setup guide [here](https://ghostveterans.com/vps/)
+
+The first section 'VPS Provider & Setup' is for setting up a vps with the provider 'Vultr.com'
+you can use this one, or any you like. Make sure the system is Ubuntu 20.04 and 2gb of ram.
+
+The next part in that guide 'Connecting to your VPS' is for getting a ssh connection.
+
+After that part secure your server using the guide found [here](https://github.com/bleach86/GhostVault/blob/main/docs/VPSsetup.MD)
+
+Once your server is secured, return back here and continue with this guide.
+
+#############################################################################################
+To start with, any currently running instances of ghostd will need to be stopped before continuing with this guide.
 
 Now that there is no instance of ghostd running we can continue.
 Now let's make sure your system is up to date by running:
@@ -23,7 +33,7 @@ sudo apt install python3-pip git
 Clone the repository:
 
 ```
-cd && git clone https://github.com/bleach86/GhostVault && cd GhostVault/
+cd && git clone https://github.com/ghost-coin/GhostVault && cd GhostVault/
 ```
 
 Install the python modules:
@@ -63,7 +73,7 @@ After you have your key chosen and recorded, the next step is setting up the rew
 The reward address is where staking rewards are sent. You should have control over this wallet.
 You can use either a standard or a stealth address for this.
 
-For normal privacy made use a standard address. In this mode, all staking rewards are paid directly to public address
+For normal privacy mode use a standard address. In this mode, all staking rewards are paid directly to public address
 In a public transaction. This will pay to the same address every time.
 
 For Enhanced Privacy mode use a stealth address. In this mode all staking rewards are paid directly to your wallet on a public transaction,
