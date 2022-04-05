@@ -17,7 +17,7 @@ After that part secure your server using the guide found [here](https://github.c
 Once your server is secured, return back here and continue with this guide.
 
 #############################################################################################
-To start with, any currenty running instances of ghostd will need to be stopped before continuing with this guide.
+To start with, any currently running instances of ghostd will need to be stopped before continuing with this guide.
 
 Now that there is no instance of ghostd running we can continue.
 Now let's make sure your system is up to date by running:
@@ -73,7 +73,7 @@ After you have your key chosen and recorded, the next step is setting up the rew
 The reward address is where staking rewards are sent. You should have control over this wallet.
 You can use either a standard or a stealth address for this.
 
-For normal privacy made use a standard address. In this mode, all staking rewards are paid directly to public address
+For normal privacy mode use a standard address. In this mode, all staking rewards are paid directly to public address
 In a public transaction. This will pay to the same address every time.
 
 For Enhanced Privacy mode use a stealth address. In this mode all staking rewards are paid directly to your wallet on a public transaction,
