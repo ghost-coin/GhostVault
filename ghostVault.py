@@ -214,6 +214,9 @@ def getSystem():
             arch = 'aarch64'
         elif platform.uname()[-2] == 'x86_64':
             arch = 'x86_64'
+    if system == 'Darwin':
+        system = 'MacOS'
+    
     return f'{arch}-{system}'
 
 def syncProgress():
@@ -382,7 +385,12 @@ def getHash(path):
     return readable_hash
 
 def prepareDataDir():
-    datadir = os.path.expanduser('~/.ghost/')
+    system = platform.system()
+    
+    if system == 'Linux':
+        datadir = os.path.expanduser('~/.ghost/')
+    elif system == 'Darwin':
+        datadir = os.path.expanduser('~/Library/Application Support/Ghost/')
     
     if os.path.isdir(datadir):
         print('Data directory found...')
@@ -395,7 +403,12 @@ def prepareDataDir():
         shutil.copy('templates/ghost.conf', datadir)
 
 def clearBlocks():
-    datadir = os.path.expanduser('~/.ghost')
+    system = platform.system()
+    
+    if system == 'Linux':
+        datadir = os.path.expanduser('~/.ghost')
+    elif system == 'Darwin':
+        datadir = os.path.expanduser('~/Library/Application Support/Ghost')
     
     rmdir = ['blocks', 'chainstate']
     print("Clearing blocks...")
@@ -1140,7 +1153,11 @@ def waitForDaemon():
 def waitForDaemonShutdown():
     print("Waiting for full daemon shutdown...")
     count = 0
-    pidFile = os.path.expanduser("~/.ghost/ghost.pid")
+    system = platform.system()
+    if system == 'Linux':
+        pidFile = os.path.expanduser('~/.ghost/ghost.pid')
+    elif system == 'Darwin':
+        pidFile = os.path.expanduser('~/Library/Application Support/Ghost/ghost.pid')
     while True:
         
         if os.path.isfile(pidFile):
