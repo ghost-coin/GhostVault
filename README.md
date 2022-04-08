@@ -3,6 +3,9 @@ Ghost coin cold staking node managment interface
 
 Setup walkthrough:
 
+For running GhostVault on Windows, you should start [here](https://github.com/bleach86/GhostVault/blob/main/docs/Win_setup.MD)
+
+
 This guide is for Ubuntu/Debian based systems. Other systems to come.
 
 Sart with with this VPS setup guide [here](https://ghostveterans.com/vps/)
