@@ -139,6 +139,6 @@ After 2 minutes has elapsed go to the start menu and select Ubuntu on Windows.
 
 In the prompt enter `sudo service cron status`. If everything wend well, it should so `* cron is running`
 
-You are now ready for the installation of GhostVault. Please proceed to the main readme after the row of `#`
+You are now ready for the installation of GhostVault. Please proceed to the main [readme](https://github.com/bleach86/GhostVault#readme) after the row of `#`
 
 
