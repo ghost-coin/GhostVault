@@ -216,6 +216,7 @@ def getSystem():
             arch = 'x86_64'
     if system == 'Darwin':
         system = 'MacOS'
+        arch = 'x86_64'
     
     return f'{arch}-{system}'
 

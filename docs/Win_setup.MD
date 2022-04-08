@@ -38,9 +38,9 @@ The following is to be done in the WLS environment
 If your WSL environment is not open, go to the start menu and select Ubuntu on Windows.
 
 Now right click the top bar of the window and select `Properties`
-IN the window that comes up, select the check box next to `Use Ctrl+Shift+C/V as Copy/Paste` then click the OK button.
+In the window that comes up, select the check box next to `Use Ctrl+Shift+C/V as Copy/Paste` then click the OK button.
 
-Use `ctrl+shift+c` to copy from the command line and 'ctrl+shift+V` to paste into it.
+Use `ctrl+shift+c` to copy from the command line and `ctrl+shift+v` to paste into it.
 
 In the prompt, we need to make a startup script with
 
