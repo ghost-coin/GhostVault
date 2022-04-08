@@ -80,8 +80,16 @@ Now, back in Windows we will setup the scheduled task that will activate WSL and
 
 In the start menu, search for Task Scheduler. And as before with powershell, right click and select 'Run as administrator`.
 
-First, click on `Task Scheduler Library` on the left hand side. Then click on `Create Task…` on the right hand side.
-This will ope a tabbed window for making a new task. 
+First, click on `Task Scheduler Library` on the left hand side. 
+
+![alt text](https://github.com/bleach86/GhostVault/blob/main/assets/taskschedulerlib.PNG?raw=true)
+
+Then click on `Create Task…` on the right hand side.
+
+![alt text](https://github.com/bleach86/GhostVault/blob/main/assets/createtask.PNG?raw=true)
+
+
+This will open a tabbed window for making a new task. 
 
 ****************************************************
 General Tab
@@ -91,6 +99,8 @@ On the general tab, start by giving your task a name. Any will do, like `WSL ser
 Then select the choice that says `Run whether user is logged or not`
 Then select `Do not store password` and `Run with highest privileges`
 And finally in the `Configure for` dropdown, select the `Windows 10` option.
+
+![alt text](https://github.com/bleach86/GhostVault/blob/main/assets/generaltab.PNG?raw=true)
 
 ****************************************************
 Triggers Tab
@@ -104,6 +114,8 @@ Under advanced setting select `Delay task for` and then select `1 Minute` from t
 Now select 'OK' to go back to the main task creation window.
 
 
+![alt text](https://github.com/bleach86/GhostVault/blob/main/assets/newtrigger.PNG?raw=true)
+
 ****************************************************
 Actions Tab
 ****************************************************
@@ -112,6 +124,8 @@ On the Actions tab, start by selecting `New...` near the bottom left.
 Choose `Start a program` from the Action dropdown.
 Then enter `C:\Windows\System32\wsl.exe` in the textbox for Program/script.
 Now in the box for `Add arguments (optional)` put in `sudo cronstart.sh`.
+
+![alt text](https://github.com/bleach86/GhostVault/blob/main/assets/newaction.PNG?raw=true)
 
 Now click `OK` then click `OK` on the task creation window.
 
@@ -126,4 +140,5 @@ After 2 minutes has elapsed go to the start menu and select Ubuntu on Windows.
 In the prompt enter `sudo service cron status`. If everything wend well, it should so `* cron is running`
 
 You are now ready for the installation of GhostVault. Please proceed to the main readme after the row of `#`
+
 
