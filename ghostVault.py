@@ -709,8 +709,8 @@ def quickstart():
                 input("Press Enter to continue...")
     cronFound = False
     cronBoot = False
-    cmd = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py update"
-    cmdBoot = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py start"
+    cmd = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py update"
+    cmdBoot = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py start"
     print("Setting up cron job")
     cron = CronTab(user=True)
     for job in cron:
@@ -856,7 +856,7 @@ def privateSetup():
 
     addr = getNewStealthAddr()
     setRewardAddress(addr, anon=True)
-    cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cronpay"
+    cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py cronpay"
     print("Setting up cron job")
     cron = CronTab(user=True)
     for job in cron:
