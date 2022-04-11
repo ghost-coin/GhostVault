@@ -461,7 +461,10 @@ def startDaemon():
     elif checkConnect() == True:
         print("Daemon already running...")
     else:
-        subprocess.call([f"{daemonInfo()['ghostdPath']}"])
+        if system == "Windows":
+            subprocess.Popen([f"{daemonInfo()['ghostdPath']}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        else:
+            subprocess.call([f"{daemonInfo()['ghostdPath']}", "-daemon"])
         waitForDaemon()
         try:
             loadWallet(daemonInfo()['walletName'])
