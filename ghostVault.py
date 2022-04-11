@@ -779,13 +779,13 @@ def quickstart():
         print(f"Setting up Windows Tasks...")
         
         try:
-            subprocess.call(f'{shutil.which("schtasks")} /create /sc hourly /mo 2 /tn "GhostVault Updater" /tr "{os.path.expanduser("~/GhostVault/batchFiles/vaultUpdate.bat")}"')
+            subprocess.call(f'{shutil.which("schtasks")} /create /sc hourly /mo 2 /tn "GhostVault Updater" /tr "{os.path.expanduser("~")}\\GhostVault\\vaultUpdate.bat"')
             print(f"Update task successfully set.\n")
         except Exception as e:
             showError(e)
         
         try:
-            subprocess.call(f'{shutil.which("schtasks")} /create /sc onstart /tn "GhostVault Statup" /tr "{os.path.expanduser("~/GhostVault/batchFiles/vaultStart.bat")}"')
+            subprocess.call(f'{shutil.which("schtasks")} /create /sc onstart /tn "GhostVault Statup" /tr "{os.path.expanduser("~")}\\GhostVault\\vaultStart.bat"')
             print(f"Startup task successfully set.\n")
         except Exception as e:
             showError(e)
@@ -933,7 +933,7 @@ def privateSetup():
         print(f"Creating Windows task...")
         
         try:
-            subprocess.call(f'{shutil.which("schtasks")} /create /sc minute /mo 15 /tn "GhostVault Payment Processor" /tr "{os.path.expanduser("~/GhostVault/batchFiles/vaultPay.bat")}"')
+            subprocess.call(f'{shutil.which("schtasks")} /create /sc minute /mo 15 /tn "GhostVault Payment Processor" /tr "{os.path.expanduser("~")}\\GhostVault\\vaultPay.bat"')
             print(f"Task successfully set.\n")
         except Exception as e:
             showError(e)
