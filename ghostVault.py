@@ -343,8 +343,12 @@ def extractDaemon():
         #time.sleep(5)
         #shutil.unpack_archive(archive, os.getcwd(), archiveFormat)
     for dirpath, dirnames, filenames in os.walk("."):
-        for filename in [f for f in filenames if f == "ghostd"]:
+        if system == "Windows":
+            for filename in [f for f in filenames if f == "ghostd.exe"]:
             daemonPath = os.path.join(dirpath, filename)
+        else:
+            for filename in [f for f in filenames if f == "ghostd"]:
+                daemonPath = os.path.join(dirpath, filename)
     dInfo = daemonInfo()
     dInfo['ghostdPath'] = daemonPath
     dInfo['ghostdHash'] = getDaemonHash(daemonPath)
