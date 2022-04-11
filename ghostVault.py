@@ -486,7 +486,7 @@ def removeDaemon():
     elif os.path.isfile(daemonInfo()['ghostdPath']) == False:
         return
     if system == 'Windows':
-        daemonDir = f"{daemonInfo()['ghostdPath'].split('\\')[1]}/"
+        daemonDir = daemonInfo()['ghostdPath'].split('\\')[1]}
     else:
         daemonDir = f"{daemonInfo()['ghostdPath'].split('/')[1]}/"
     
