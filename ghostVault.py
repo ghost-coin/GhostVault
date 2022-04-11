@@ -189,7 +189,7 @@ def loadWallet(walletName):
     if checkWalletLoad() == True:
         wallet = rpcproxy().getwalletinfo()['walletname']
         if wallet == walletName:
-            print("Wallet {walletName} already loaded.")
+            print(f"Wallet {walletName} already loaded.")
             return
         else:
             rpcproxy().loadwallet(walletName)
@@ -427,21 +427,16 @@ def clearBlocks():
 
 def createBatchFiles():
     print('Preparing batch files...')
-    if not os.path.isdir('batchFiles/'):
-        print("Batch file directory not found, creating...")
-        os.mkdir('batchFiles')
-    else:
-        print('Batch file directory found.')
         
     batchFiles = [('vaultStart.bat', 'start'), ('vaultUpdate.bat', 'update'), ('vaultPay.bat', 'cronpay')]
     
     for i in batchFiles:
-        if os.path.isfile(f'batchFiles/{i[0]}'):
+        if os.path.isfile(f'{i[0]}'):
             print(f"Batch file '{i[0]}' found. Skipping")
         else:
             print(f"Creating batch file '{i[0]}'...")
             
-            with open(f"batchFiles/{i[0]}", "w") as f:
+            with open(f"{i[0]}", "w") as f:
                 f.write(f'@echo off\n"{shutil.which("python")}" "{os.path.expanduser("~")}\\GhostVault\\ghostVault.py" "{i[1]}"\npause')
             print("Success!")
 
