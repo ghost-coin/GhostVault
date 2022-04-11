@@ -437,7 +437,7 @@ def createBatchFiles():
             print(f"Creating batch file '{i[0]}'...")
             
             with open(f"{i[0]}", "w") as f:
-                f.write(f'@echo off\n"{shutil.which("python")}" "{os.path.expanduser("~")}\\GhostVault\\ghostVault.py" "{i[1]}"\npause')
+                f.write(f'@echo off\ncd "{os.path.expanduser("~")}\\GhostVault\\" && "{shutil.which("python")}" "ghostVault.py" "{i[1]}"\npause')
             print("Success!")
 
 def updateDaemonInfo(dInfo):
