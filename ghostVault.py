@@ -15,7 +15,7 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v0.9"
+version = "v1.0"
 
 def rpcproxy():
     rpcproxy = AuthServiceProxy('http://%s:%s@127.0.0.1:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT), timeout=120)
@@ -185,7 +185,7 @@ def createWallet(walletName):
 
 def loadWallet(walletName):
     if checkWalletLoad() == True:
-        wallet = rpcproxy.getwalletinfo()['walletname']
+        wallet = rpcproxy().getwalletinfo()['walletname']
         if wallet == walletName:
             print("Wallet {walletName} already loaded.")
             return
@@ -476,6 +476,9 @@ def removeArchive():
         os.remove(archive)
     else:
         print('Archive file not found.')
+    dInfo = daemonInfo()
+    dInfo['archive'] = ""
+    updateDaemonInfo(dInfo)
 
 def getStats(duration="all", days=None):
     tnow = time.time()
@@ -775,6 +778,10 @@ def makeWallet():
     dInfo = daemonInfo()
     dInfo['walletName'] = walletName
     createWallet(walletName)
+    try:
+        loadWallet(walletName)
+    except:
+        pass
     updateDaemonInfo(dInfo)
     words = mnemonic()
     clear()
