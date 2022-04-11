@@ -495,7 +495,10 @@ def removeDaemon():
     updateDaemonInfo(dInfo)
 
 def removeArchive():
-    archive = getLink().split("/")[-1]
+    if system == 'Windows':
+        archive = getLink().split("\\")[-1]
+    else:
+        archive = getLink().split("/")[-1]
     
     if os.path.isfile(archive):
         print(f'Removing archive file {archive}...')
