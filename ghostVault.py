@@ -485,7 +485,11 @@ def removeDaemon():
         return
     elif os.path.isfile(daemonInfo()['ghostdPath']) == False:
         return
-    daemonDir = f"{daemonInfo()['ghostdPath'].split('/')[1]}/"
+    if system == 'Windows':
+        daemonDir = f"{daemonInfo()['ghostdPath'].split('\\')[1]}/"
+    else:
+        daemonDir = f"{daemonInfo()['ghostdPath'].split('/')[1]}/"
+    
     stopDaemon()
     print('Removing deamon directory.')
     shutil.rmtree(daemonDir)
@@ -495,10 +499,7 @@ def removeDaemon():
     updateDaemonInfo(dInfo)
 
 def removeArchive():
-    if system == 'Windows':
-        archive = getLink().split("\\")[-1]
-    else:
-        archive = getLink().split("/")[-1]
+    archive = getLink().split("/")[-1]
     
     if os.path.isfile(archive):
         print(f'Removing archive file {archive}...')
