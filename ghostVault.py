@@ -345,7 +345,7 @@ def extractDaemon():
     for dirpath, dirnames, filenames in os.walk("."):
         if system == "Windows":
             for filename in [f for f in filenames if f == "ghostd.exe"]:
-            daemonPath = os.path.join(dirpath, filename)
+                daemonPath = os.path.join(dirpath, filename)
         else:
             for filename in [f for f in filenames if f == "ghostd"]:
                 daemonPath = os.path.join(dirpath, filename)
