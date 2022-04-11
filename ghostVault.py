@@ -462,6 +462,7 @@ def startDaemon():
         print("Daemon already running...")
     else:
         if system == "Windows":
+            print("Ghost Core starting")
             subprocess.Popen([f"{daemonInfo()['ghostdPath']}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         else:
             subprocess.call([f"{daemonInfo()['ghostdPath']}", "-daemon"])
@@ -842,9 +843,11 @@ def makeWallet():
     importKey(words)   
 
 def getLoad():
-    load1, load5, load15 = os.getloadavg()
-    
-    return [load1, load5, load15]
+    if system == "Windows":
+        return [0, 0, 0]
+    else:
+        load1, load5, load15 = os.getloadavg()
+        return [load1, load5, load15]
 
 def uptime():
     return time.time() - psutil.boot_time()
