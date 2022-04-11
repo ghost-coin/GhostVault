@@ -17,6 +17,8 @@ RPCPORT = 51725
 
 version = "v1.0"
 
+system = platform.system()
+
 def rpcproxy():
     rpcproxy = AuthServiceProxy('http://%s:%s@127.0.0.1:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT), timeout=120)
     return rpcproxy
@@ -205,18 +207,19 @@ def isBadFork():
         return True
 
 def getSystem():
-    system = platform.system()
-    arch = platform.processor()
-    if arch == '':
-        if platform.uname()[-2] == 'armv7l':
-            arch = 'arm'
-        elif platform.uname()[-2] == 'aarch64':
-            arch = 'aarch64'
-        elif platform.uname()[-2] == 'x86_64':
-            arch = 'x86_64'
-    if system == 'Darwin':
-        system = 'MacOS'
+    arch = platform.uname()[-2]
+
+    if arch == 'armv7l':
+        arch = 'arm'
+    elif arch == 'aarch64':
+        arch = 'aarch64'
+    elif arch == 'x86_64' or arch == 'AMD64':
         arch = 'x86_64'
+    
+    if system == 'Darwin':
+        systemOS = 'MacOS'
+        arch = 'x86_64'
+        return f'{arch}-{systemOS}'
     
     return f'{arch}-{system}'
 
@@ -261,7 +264,6 @@ def convertToSat(value):
     return sat_readable
 
 def clear():
-    system = getSystem().split("-")[1]
     if system == "Windows":
         os.system('cls')
     else:
@@ -386,12 +388,12 @@ def getHash(path):
     return readable_hash
 
 def prepareDataDir():
-    system = platform.system()
-    
     if system == 'Linux':
         datadir = os.path.expanduser('~/.ghost/')
     elif system == 'Darwin':
         datadir = os.path.expanduser('~/Library/Application Support/Ghost/')
+    elif system == 'Windows':
+        datadir = os.path.expanduser('~/AppData/Roaming/Ghost/')
     
     if os.path.isdir(datadir):
         print('Data directory found...')
@@ -404,12 +406,12 @@ def prepareDataDir():
         shutil.copy('templates/ghost.conf', datadir)
 
 def clearBlocks():
-    system = platform.system()
-    
     if system == 'Linux':
         datadir = os.path.expanduser('~/.ghost')
     elif system == 'Darwin':
         datadir = os.path.expanduser('~/Library/Application Support/Ghost')
+    elif system == 'Windows':
+        datadir = os.path.expanduser('~/AppData/Roaming/Ghost')
     
     rmdir = ['blocks', 'chainstate']
     print("Clearing blocks...")
@@ -418,6 +420,26 @@ def clearBlocks():
     os.remove(f'{datadir}/peers.dat')
     os.remove(f'{datadir}/banlist.dat')
     print('Blocks successfully cleared.')
+
+def createBatchFiles():
+    print('Preparing batch files...')
+    if not os.path.isdir('batchFiles/'):
+        print("Batch file directory not found, creating...")
+        os.mkdir('batchFiles')
+    else:
+        print('Batch file directory found.')
+        
+    batchFiles = [('vaultStart.bat', 'start'), ('vaultUpdate.bat', 'update'), ('vaultPay.bat', 'cronpay')]
+    
+    for i in batchFiles:
+        if os.path.isfile(f'batchFiles/{i[0]}'):
+            print(f"Batch file '{i[0]}' found. Skipping")
+        else:
+            print(f"Creating batch file '{i[0]}'...")
+            
+            with open(f"batchFiles/{i[0]}", "w") as f:
+                f.write(f'@echo off\n"{shutil.which("python")}" "{os.path.expanduser("~/GhostVault/ghostVault.py")} {i[1]}"\npause')
+            print("Success!")
 
 def updateDaemonInfo(dInfo):
     with open('daemon.json', 'r+') as f:
@@ -710,38 +732,54 @@ def quickstart():
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
                 input("Press Enter to continue...")
-    cronFound = False
-    cronBoot = False
-    cmd = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py update"
-    cmdBoot = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py start"
-    print("Setting up cron job")
-    cron = CronTab(user=True)
-    for job in cron:
-        if cmd in str(job):
-            print(f"Update cron found, skipping")
-            cronFound = True
-            
-        elif cmdBoot in str(job):
-            print(f"Start on boot cron found, skipping")
-            cronBoot = True
-            
-    if cronFound == False:
+    if system != 'Windows':
+        cronFound = False
+        cronBoot = False
+        cmd = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py update"
+        cmdBoot = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py start"
+        print("Setting up cron job...")
+        cron = CronTab(user=True)
+        for job in cron:
+            if cmd in str(job):
+                print(f"Update cron found, skipping")
+                cronFound = True
+                
+            elif cmdBoot in str(job):
+                print(f"Start on boot cron found, skipping")
+                cronBoot = True
+                
+        if cronFound == False:
+            try:
+                job3 = cron.new(command=cmd)
+                job3.hour.every(2)
+                cron.write()
+                print("Update cron successfully set.\n")
+                
+            except Exception as e:
+                showError(e)
+        
+        if cronBoot == False:
+            try:
+                job4 = cron.new(command=cmdBoot)
+                job4.every_reboot()
+                cron.write()
+                print("Start on boot cron successfully set.\n")
+                
+            except Exception as e:
+                showError(e)
+    elif system == 'Windows':
+        createBatchFiles()
+        print(f"Setting up Windows Tasks...")
+        
         try:
-            job3 = cron.new(command=cmd)
-            job3.hour.every(2)
-            cron.write()
-            print("Update cron successfully set.\n")
-            
+            subprocess.call(f'{shutil.which("schtasks")} /create /sc hourly /mo 2 /tn "GhostVault Updater" /tr "{os.path.expanduser("~/GhostVault/batchFiles/vaultUpdate.bat")}"')
+            print(f"Update task successfully set.\n")
         except Exception as e:
             showError(e)
-    
-    if cronBoot == False:
+        
         try:
-            job4 = cron.new(command=cmdBoot)
-            job4.every_reboot()
-            cron.write()
-            print("Start on boot cron successfully set.\n")
-            
+            subprocess.call(f'{shutil.which("schtasks")} /create /sc onstart /tn "GhostVault Statup" /tr "{os.path.expanduser("~/GhostVault/batchFiles/vaultStart.bat")}"')
+            print(f"Startup task successfully set.\n")
         except Exception as e:
             showError(e)
             
@@ -863,21 +901,31 @@ def privateSetup():
 
     addr = getNewStealthAddr()
     setRewardAddress(addr, anon=True)
-    cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py cronpay"
-    print("Setting up cron job")
-    cron = CronTab(user=True)
-    for job in cron:
-        if cmdPay in str(job):
-            print(f"cron job found, skipping")
-            cronPayFound = True
-            
-    if cronPayFound == False:
+    if system != 'Windows':
+        cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py cronpay"
+        print("Setting up cron job")
+        cron = CronTab(user=True)
+        for job in cron:
+            if cmdPay in str(job):
+                print(f"cron job found, skipping")
+                cronPayFound = True
+                
+        if cronPayFound == False:
+            try:
+                job3 = cron.new(command=cmdPay)
+                job3.minute.every(15)
+                cron.write()
+                print("Cron successfully set.\n")
+                
+            except Exception as e:
+                showError(e)
+    elif system == 'Windows':
+        createBatchFiles()
+        print(f"Creating Windows task...")
+        
         try:
-            job3 = cron.new(command=cmdPay)
-            job3.minute.every(15)
-            cron.write()
-            print("Cron successfully set.\n")
-            
+            subprocess.call(f'{shutil.which("schtasks")} /create /sc minute /mo 15 /tn "GhostVault Payment Processor" /tr "{os.path.expanduser("~/GhostVault/batchFiles/vaultPay.bat")}"')
+            print(f"Task successfully set.\n")
         except Exception as e:
             showError(e)
     
@@ -1161,11 +1209,12 @@ def waitForDaemon():
 def waitForDaemonShutdown():
     print("Waiting for full daemon shutdown...")
     count = 0
-    system = platform.system()
     if system == 'Linux':
         pidFile = os.path.expanduser('~/.ghost/ghost.pid')
     elif system == 'Darwin':
         pidFile = os.path.expanduser('~/Library/Application Support/Ghost/ghost.pid')
+    elif system == 'Windows':
+        pidFile = os.path.expanduser('~/AppData/Roaming/Ghost/ghost.pid')
     while True:
         
         if os.path.isfile(pidFile):
