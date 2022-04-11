@@ -458,7 +458,7 @@ def startDaemon():
     else:
         if system == "Windows":
             print("Ghost Core starting")
-            subprocess.Popen([f"{daemonInfo()['ghostdPath']}"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            subprocess.Popen([f"start cmd /C {daemonInfo()['ghostdPath']}"], shell=True)
         else:
             subprocess.call([f"{daemonInfo()['ghostdPath']}", "-daemon"])
         waitForDaemon()
@@ -869,7 +869,7 @@ def private():
         
         while True:
             
-            ans = input(f"Press Enter to quit or type '{Fore.CYAN}private{Style.RESET_ALL}' to continue with\nANON mode setup. ")
+            ans = input(f"Press Enter to quit or type {Fore.CYAN}private{Style.RESET_ALL} to continue with\nANON mode setup. ")
             
             if ans == "private":
                 privateSetup()
@@ -1168,7 +1168,7 @@ def makeRewardAddress():
         print(f"ANON mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
         print(f"Continuing will disable ANON mode.")
         while True:
-            ans = input(f"Type '{Fore.CYAN}public{Style.RESET_ALL}' to continue or Enter to exit: ")
+            ans = input(f"Type {Fore.CYAN}public{Style.RESET_ALL} to continue or Enter to exit: ")
             
             if ans == 'public':
                 print(f"Continuing...")
