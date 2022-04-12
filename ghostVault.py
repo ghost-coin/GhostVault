@@ -437,7 +437,7 @@ def createBatchFiles():
             print(f"Creating batch file '{i[0]}'...")
             
             with open(f"{i[0]}", "w") as f:
-                f.write(f'@echo off\ncd "{os.path.expanduser("~")}\\GhostVault\\" && "{shutil.which("python")}" "ghostVault.py" "{i[1]}"\npause')
+                f.write(f'@echo off\ncd "{os.path.expanduser("~")}\\GhostVault\\" && "{shutil.which("python")}" "ghostVault.py" "{i[1]}"')
             print("Success!")
 
 def updateDaemonInfo(dInfo):
@@ -784,11 +784,8 @@ def quickstart():
         except Exception as e:
             showError(e)
         
-        try:
-            subprocess.call(f'{shutil.which("schtasks")} /create /sc onstart /tn "GhostVault Statup" /tr "{os.path.expanduser("~")}\\GhostVault\\vaultStart.bat"')
-            print(f"Startup task successfully set.\n")
-        except Exception as e:
-            showError(e)
+        shutil.copy(vaultStart.bat, f"{os.path.expanduser('~')}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\")
+        print(f"Startup task successfully set.\n")
             
     print(f"Quick start success!")
     dInfo = daemonInfo()
