@@ -869,7 +869,8 @@ def private():
         
         while True:
             
-            ans = input(f"Press Enter to quit or type {Fore.CYAN}private{Style.RESET_ALL} to continue with\nANON mode setup. ")
+            print(f"Press Enter to quit or type '{Fore.CYAN}private{Style.RESET_ALL}' to continue with")
+            ans = input(f"ANON mode setup. ")
             
             if ans == "private":
                 privateSetup()
