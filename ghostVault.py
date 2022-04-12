@@ -458,7 +458,7 @@ def startDaemon():
     else:
         if system == "Windows":
             print("Ghost Core starting")
-            subprocess.Popen([f"start cmd /C {daemonInfo()['ghostdPath']}"], shell=True)
+            subprocess.Popen(f"start cmd /C {daemonInfo()['ghostdPath']}", shell=True)
         else:
             subprocess.call([f"{daemonInfo()['ghostdPath']}", "-daemon"])
         waitForDaemon()
