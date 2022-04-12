@@ -836,10 +836,10 @@ def makeWallet():
 
 def getLoad():
     if system == "Windows":
-        return [0, 0, 0]
+        load1, load5, load15 = psutil.getloadavg()
     else:
         load1, load5, load15 = os.getloadavg()
-        return [load1, load5, load15]
+    return [load1, load5, load15]
 
 def uptime():
     return time.time() - psutil.boot_time()
