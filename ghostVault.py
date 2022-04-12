@@ -784,7 +784,7 @@ def quickstart():
         except Exception as e:
             showError(e)
         
-        shutil.copy(vaultStart.bat, f"{os.path.expanduser('~')}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\")
+        shutil.copy('vaultStart.bat', f"{os.path.expanduser('~')}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\")
         print(f"Startup task successfully set.\n")
             
     print(f"Quick start success!")
