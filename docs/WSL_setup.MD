@@ -1,12 +1,12 @@
-**GhostVault setup guide for Windows**
+# GhostVault setup guide for Windows using WSL
 
 
 This guide is for setting up GhostVault on Windows using WSL. 
 WSL, or Windows Subsystem for Linux is a built-in tool that allows you to run a full Linux environment as an app from within windows.
 
-Running GhostVault using WSL has two distinct advantages. One, this allows a common set of tools across installations to help simplify development.
-Two, running GhostVault with WSL allows your cold staking node to be sand-boxed on your system. This allows you to run your cold staking node at the
+Running GhostVault using WSL has a few advantages. One being, running GhostVault with WSL allows your cold staking node to be sand-boxed on your system. This allows you to run your cold staking node at the
 same time as your regular Windows desktop wallet.
+
 This means that GhostVault will effectively run in the background while you can continue to use your computer as normal, including your normal wallet.
 
 **1. Installing WSL**

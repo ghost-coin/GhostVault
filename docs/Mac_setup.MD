@@ -1,4 +1,4 @@
-**GhostVault setup for MacOS**
+# GhostVault setup for MacOS
 
 To begin, either log into the machine or open a terminal window if installing locally.
 

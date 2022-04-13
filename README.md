@@ -49,7 +49,9 @@ pip3 install -r requirements.txt
 That concludes the system setup, and you are ready to run GhostVault for the first time and do the initial setup.
 
 **NOTE** In case of file not found error when running GhostVault commands
+
 **NOTE** On Linux/MacOS/WSL, type the following `cd ~/GhostVault`
+
 **NOTE** On Windows, close the current cmd window and open a new one, then type `cd GhostVault`
 
 ************************************************
@@ -148,7 +150,9 @@ You can follow the steps under `Connecting Ghost Wallet to your Cold staking VPS
 *********************************************
 
 **NOTE** In case of file not found error when running GhostVault commands
+
 **NOTE** On Linux/MacOS/WSL, type the following `cd ~/GhostVault`
+
 **NOTE** On Windows, close the current cmd window and open a new one, then type `cd GhostVault`
 
 All commands are run as follows
