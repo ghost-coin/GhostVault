@@ -48,13 +48,29 @@ pip3 install -r requirements.txt
 
 That concludes the system setup, and you are ready to run GhostVault for the first time and do the initial setup.
 
-**NOTE** run `cd ~/GhostVault` if you get file not found in following steps. 
+**NOTE** In case of file not found error when running GhostVault commands
+**NOTE** On Linux/MacOS/WSL, type the following `cd ~/GhostVault`
+**NOTE** On Windows, close the current cmd window and open a new one, then type `cd GhostVault`
 
-To start the GhostVault quickstat simply run:
+************************************************
+GhostVault Universal Quickstart Guide
+************************************************
+
+
+To start the GhostVault quickstat simply run
+
+For Linux/MacOS/WSL:
 
 ```
 python3 ghostVault.py quickstart
 ```
+
+For Windows:
+
+```
+python ghostVault.py quickstart
+```
+
 
 This will start the quickstart guide. It will start by downloading ghostd and syncing with the ghost network.
 There will also be a check in this stage to make sure your node is on the correct chain. If it says bad chain detected,
@@ -91,11 +107,21 @@ And that's it for the quickstart. Now you can start staking.
 Full Anon mode.
 
 Once the quickstart is finished, you can activate full Anon mode if you wish.
+
 This can be done as followes:
+
+For Linux/MacOS/WSL:
 
 ```
 python3 ghostVault.py private
 ```
+
+For Windows:
+
+```
+python ghostVault.py private
+```
+
 
 So first it will want you to type `private` to confirm that you want to activate anon mode.
 The only thing you should have to do is put the address where you want your anonymized funds to go.
@@ -116,11 +142,30 @@ The addresses can be changed at any time, and the proper modes are automatically
 Next step would be to use the extended public key to setup cold staking on your wallet.
 You can follow the steps under `Connecting Ghost Wallet to your Cold staking VPS` found here https://ghostveterans.com/vps/
 
+
+*********************************************
 **COMMANDS**
+*********************************************
 
-If you run a command and get something like 'ghostVault.py file not found' do `cd ~/GhostVault` and try again
+**NOTE** In case of file not found error when running GhostVault commands
+**NOTE** On Linux/MacOS/WSL, type the following `cd ~/GhostVault`
+**NOTE** On Windows, close the current cmd window and open a new one, then type `cd GhostVault`
 
-All commands are run like `python3 ghostVault.py <command>`
+All commands are run as follows
+
+For Linux/MacOS/WSL:
+
+```
+python3 ghostVault.py <command>
+```
+
+For Windows:
+
+```
+python ghostVault.py <command>
+```
+
+
 
 `quickstart` : This runs the quickstart guide. It should be run first.
 

@@ -1309,7 +1309,10 @@ def main():
                 print(f"Your extended public key is:\n\n{Fore.CYAN}{key}{Style.RESET_ALL}")
         
         elif arg == "update":
-            repo = git.Repo(os.path.expanduser("~/GhostVault"))
+            if system == "Windows":
+                repo = git.Repo(f"{os.path.expanduser('~')}\\GhostVault")
+            else:
+                repo = git.Repo(os.path.expanduser("~/GhostVault"))
             repo.remotes.origin.pull()
             
             print(f"Checking if ghostd is up to date...")
