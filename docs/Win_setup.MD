@@ -9,7 +9,7 @@ The procedure for running GhostVault on Windows using WSL can be found [here](ht
 
 Start by downloading Python from [here](https://www.python.org/ftp/python/3.10.4/python-3.10.4-amd64.exe).
 
-Once downloaded, run the installer. Make sure that the box next to `Add Python 3.10 to PATH`, then click on install now.
+Once downloaded, run the installer. Make sure to check the box next to `Add Python 3.10 to PATH`, then click on install now.
 
 
 ![alt text](https://github.com/bleach86/GhostVault/blob/main/assets/python_install_win.PNG?raw=true)
