@@ -7,7 +7,7 @@ For running GhostVault on Windows, you should start [here](https://github.com/bl
 
 For running GhostVault on MacOS, you should start [here](https://github.com/bleach86/GhostVault/blob/main/docs/Mac_setup.MD)
 
-This guide is for Ubuntu/Debian based systems. Other systems to come.
+The following is for Ubuntu/Debian based systems.
 
 Sart with with this VPS setup guide [here](https://ghostveterans.com/vps/)
 
