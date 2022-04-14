@@ -23,15 +23,15 @@ Once downloaded, run the installer. Click on the `Next` button until it becomes 
 
 **2. Download GhostVault and install Python modules**
 
-Open a cmd window but clicking on the start menu. Once the menu is up, type `cmd`, then click on `Command Prompt` to open a cmd window.
+Open a cmd window buy clicking on the start menu. Once the menu is up, type `cmd`, then click on `Command Prompt` to open a cmd window.
 
-Enter the following command to download GhostVasult and to change into the new directory.
+Enter the following command to download GhostVault and to change into the new directory.
 
 ```
 git clone https://github.com/ghost-coin/GhostVault && cd GhostVault
 ```
 
-Now now to install the needed Python modules enter the following command
+Now to install the needed Python modules enter the following command
 
 ```
 pip install -r requirements.txt
