@@ -1384,7 +1384,7 @@ def main():
                 print(f"{i}: {getBalances()['mine'][i]}")
                 
         elif arg == 'forceupdate':
-            print(f"Force upding Ghostd...")
+            print(f"Force updating Ghostd...")
             stopDaemon()
             waitForDaemonShutdown()
             removeArchive()
