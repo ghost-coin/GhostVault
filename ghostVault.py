@@ -1257,6 +1257,7 @@ def help():
     print(f"{Fore.BLUE}checkchain{Style.RESET_ALL}        :  Checks that ghostd is on the correct chain.")
     print(f"{Fore.BLUE}forceresync{Style.RESET_ALL}       :  Forces ghostd to resync. Use in case of bad chain.")
     print(f"{Fore.BLUE}update{Style.RESET_ALL}            :  Self updater for GhostVault and ghostd.")
+    print(f"{Fore.BLUE}forceupdate{Style.RESET_ALL}       :  Downloads Ghostd even if update is not needed.")
     print(f"{Fore.BLUE}private{Style.RESET_ALL}           :  Checks privacy mode and initiates anon mode activation.")
     print(f"{Fore.BLUE}stats{Style.RESET_ALL}             :  Basic staking stats.")
     print(f"{Fore.BLUE}anonaddress{Style.RESET_ALL}       :  Shows the current payment address when in anon mode.")
@@ -1380,7 +1381,18 @@ def main():
             print(f"GhostVault {version} balances.\n")
             
             for i in getBalances()['mine']:
-                print(f"{i}: {getBalances()['mine'][i]}") 
+                print(f"{i}: {getBalances()['mine'][i]}")
+                
+        elif arg == 'forceupdate':
+            print(f"Force upding Ghostd...")
+            stopDaemon()
+            waitForDaemonShutdown()
+            removeArchive()
+            removeDaemon()
+            downloadDaemon()
+            extractDaemon()
+            prepareDataDir()
+            startDaemon()
                 
         else:
             print(f"Unknown argument '{arg}'.\nPlease run '{Fore.CYAN}ghostVault.py help{Style.RESET_ALL}' for full list of commands.")

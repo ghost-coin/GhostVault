@@ -197,6 +197,8 @@ python ghostVault.py <command>
 
 `update`           : Runs the self updater to update GhostVault and ghostd
 
+`forceupdate`      : Downloads new ghostd even if update is not needed
+
 `checkchian`       : Checks to ensure you are on a good chain.
 
 `forceresync`      : Forces ghostd to resync with the network in case of a bad chain.
