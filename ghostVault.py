@@ -448,10 +448,10 @@ def updateDaemonInfo(dInfo):
 
 def startDaemon():
     if os.path.isfile(daemonInfo()['ghostdPath']) == False:
-        showError(f"ghostd not found! run GhostVault with 'update' or 'quickstart' argument to install daemon.")
+        showError(f"ghostd not found! run GhostVault with 'forceupdate' or 'quickstart' argument to install daemon.")
     
     elif getDaemonHash(daemonInfo()['ghostdPath']) != daemonInfo()['ghostdHash']:
-        showError(f"Daemon hash not as expected! Daemon may be courupted.\nPlease run 'ghostVault.py update' to rectify.")
+        showError(f"Daemon hash not as expected! Daemon may be courupted.\nPlease run 'ghostVault.py forceupdate' to rectify.")
     
     elif checkConnect() == True:
         print("Daemon already running...")
