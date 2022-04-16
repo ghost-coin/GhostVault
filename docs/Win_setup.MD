@@ -38,3 +38,8 @@ pip install -r requirements.txt
 ```
 
 Now you are ready to continue on to the Universal Quickstart guide found in the main [readme](https://github.com/ghost-coin/GhostVault)
+
+**NOTE** 
+
+While GhostVault is running, a cmd window will open with ghostd running in it. This window must stay open at all times. If this
+window is closed, staking will stop. 
