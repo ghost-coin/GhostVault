@@ -638,7 +638,7 @@ def quickstart():
                     if walletIndex.isdigit() == False:
                         print(f"{Fore.RED}Invalid answer. Answer must be a number matching a wallet.{Style.RESET_ALL}")
                         
-                    elif len(walletIndex) > len(getWallets()):
+                    elif int(walletIndex) > len(getWallets()):
                         print(f"{Fore.RED}Invalid answer. Answer must be a number matching a wallet.{Style.RESET_ALL}")
                     else:
                         walletName = getWallets()[int(walletIndex)-1]
@@ -683,7 +683,7 @@ def quickstart():
                     if keyIndex.isdigit() == False:
                         print(f"{Fore.RED}Invalid answer. Answer must be a number matching a key.{Style.RESET_ALL}")
                         
-                    elif len(keyIndex) > len(getWallets()):
+                    elif int(keyIndex) > len(getWallets()):
                         print(f"{Fore.RED}Invalid answer. Answer must be a number matching a key.{Style.RESET_ALL}")
                     else:
                         extKey = keys[int(keyIndex)-1]['key']
