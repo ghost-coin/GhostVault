@@ -758,6 +758,7 @@ def quickstart():
         if cronFound == False:
             try:
                 job3 = cron.new(command=cmd)
+                job3.minute.on(0)
                 job3.hour.every(2)
                 cron.write()
                 print("Update cron successfully set.\n")
