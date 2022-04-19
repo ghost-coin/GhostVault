@@ -536,6 +536,27 @@ def getStats(duration="all", days=None):
             filter = rpcproxy().filtertransactions({"from":int(i[1]), "to":int(tnow),"count":100000,"category":"stake","collate":True,"include_watchonly":True,"with_reward":True})
 
             print(f"Last {i[0]:<9}        {Fore.GREEN}{filter['collated']['records']}                 {filter['collated']['total_reward']}{Style.RESET_ALL}")
+            
+        oneStake = rpcproxy().filtertransactions({"count":1,"category":"stake","include_watchonly":True})
+        timeToFind = convertFromSat(int(getStakingInfo()['netstakeweight']) / int(getStakingInfo()['weight'])) * 120
+        
+        if len(oneStake) != 0:
+            nextReward = (tnow - oneStake[0]['time']) - timeToFind
+        else:
+            nextReward = 0
+        
+        ghostPerDay = (day / timeToFind) * 4.08
+        
+        print("\n\n")
+        print(f"Network stake weight: {convertFromSat(int(getStakingInfo()['netstakeweight'])):,}")
+        print(f"Current stake weight: {convertFromSat(int(getStakingInfo()['weight'])):,} ")
+        print(f"EST Time to find    : {str(timedelta(seconds=timeToFind)).split('.')[0]}")
+        
+        if nextReward == 0:
+            pass
+        else:
+            print(f"EST Time to next reward: {str(timedelta(seconds=nextReward)).split('.')[0]}")
+        print(f"EST Ghost per day: {ghostPerDay}")
 
 def quickstart():
     newWallet = True
@@ -1267,9 +1288,6 @@ def help():
     print(f"{Fore.BLUE}cronpay{Style.RESET_ALL}           :  Activates the payment processor. Used in a cron job.")
 
 def main():
-    if checkConnect == False:
-        print(f"Daemon not running, attempting to start")
-        startDaemon()
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower()
         if arg == "help":
