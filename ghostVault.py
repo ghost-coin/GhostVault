@@ -549,7 +549,7 @@ def getStats(duration="all", days=None):
         
         print("\n")
         print(f"Network stake weight   : {convertFromSat(int(getStakingInfo()['netstakeweight'])):,}")
-        print(f"Current stake weight   : {convertFromSat(int(getStakingInfo()['weight'])):,} ")
+        print(f"Current stake weight   : {convertFromSat(int(getStakingInfo()['weight'])):,} | {round(convertFromSat(int(getStakingInfo()['weight'])) / convertFromSat(int(getStakingInfo()['netstakeweight']))*100), 2}%")
         print(f"EST Time to find       : {str(timedelta(seconds=timeToFind)).split('.')[0]}")
         
         if nextReward == 0:
