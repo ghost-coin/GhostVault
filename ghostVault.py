@@ -540,7 +540,7 @@ def getStats(duration="all", days=None):
         oneStake = rpcproxy().filtertransactions({"count":1,"category":"stake","include_watchonly":True})
         
         if int(getStakingInfo()['weight']) != 0:
-            timeToFind = convertFromSat(int(getStakingInfo()['netstakeweight'])) / convertFromSat(int(getStakingInfo()['weight'])) * 120
+            timeToFind = convertFromSat(int(getStakingInfo()['netstakeweight']) / int(getStakingInfo()['weight'])) * 120
         else:
             timeToFind = 1
         
