@@ -538,7 +538,10 @@ def getStats(duration="all", days=None):
             print(f"Last {i[0]:<9}        {Fore.GREEN}{filter['collated']['records']}                 {filter['collated']['total_reward']}{Style.RESET_ALL}")
             
         oneStake = rpcproxy().filtertransactions({"count":1,"category":"stake","include_watchonly":True})
-        timeToFind = convertFromSat(int(getStakingInfo()['netstakeweight'])) / convertFromSat(int(getStakingInfo()['weight'])) * 120
+        if int(getStakingInfo()['weight'] != 0:
+            timeToFind = convertFromSat(int(getStakingInfo()['netstakeweight'])) / convertFromSat(int(getStakingInfo()['weight'])) * 120
+        else:
+            timeToFind == 1
         
         if len(oneStake) != 0:
             nextReward = timeToFind - (tnow - int(oneStake[0]['time']))
@@ -550,7 +553,11 @@ def getStats(duration="all", days=None):
         print("\n")
         print(f"Network stake weight   : {convertFromSat(int(getStakingInfo()['netstakeweight'])):,}")
         print(f"Current stake weight   : {convertFromSat(int(getStakingInfo()['weight'])):,} | {round(convertFromSat(int(getStakingInfo()['weight'])) / convertFromSat(int(getStakingInfo()['netstakeweight']))*100, 2)}%")
-        print(f"EST Time to find       : {str(timedelta(seconds=timeToFind)).split('.')[0]}")
+        
+        if timeToFind == 1:
+            pass
+        else:
+            print(f"EST Time to find       : {str(timedelta(seconds=timeToFind)).split('.')[0]}")
         
         if nextReward == 0:
             pass
