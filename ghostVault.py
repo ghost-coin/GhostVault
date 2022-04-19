@@ -547,16 +547,16 @@ def getStats(duration="all", days=None):
         
         ghostPerDay = (day / timeToFind) * 4.08
         
-        print("\n\n")
-        print(f"Network stake weight: {convertFromSat(int(getStakingInfo()['netstakeweight'])):,}")
-        print(f"Current stake weight: {convertFromSat(int(getStakingInfo()['weight'])):,} ")
-        print(f"EST Time to find    : {str(timedelta(seconds=timeToFind)).split('.')[0]}")
+        print("\n")
+        print(f"Network stake weight   : {convertFromSat(int(getStakingInfo()['netstakeweight'])):,}")
+        print(f"Current stake weight   : {convertFromSat(int(getStakingInfo()['weight'])):,} ")
+        print(f"EST Time to find       : {str(timedelta(seconds=timeToFind)).split('.')[0]}")
         
         if nextReward == 0:
             pass
         else:
             print(f"EST Time to next reward: {str(timedelta(seconds=nextReward)).split('.')[0]}")
-        print(f"EST Ghost per day: {ghostPerDay}")
+        print(f"EST Ghost per day      : {ghostPerDay}")
 
 def quickstart():
     newWallet = True
