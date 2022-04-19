@@ -541,7 +541,7 @@ def getStats(duration="all", days=None):
         timeToFind = convertFromSat(int(getStakingInfo()['netstakeweight'])) / convertFromSat(int(getStakingInfo()['weight'])) * 120
         
         if len(oneStake) != 0:
-            nextReward = (int(oneStake[0]['time']) - tnow) - timeToFind
+            nextReward = timeToFine - (tnow - int(oneStake[0]['time']))
         else:
             nextReward = 0
         
