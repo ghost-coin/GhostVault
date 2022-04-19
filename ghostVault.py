@@ -538,7 +538,8 @@ def getStats(duration="all", days=None):
             print(f"Last {i[0]:<9}        {Fore.GREEN}{filter['collated']['records']}                 {filter['collated']['total_reward']}{Style.RESET_ALL}")
             
         oneStake = rpcproxy().filtertransactions({"count":1,"category":"stake","include_watchonly":True})
-        if int(getStakingInfo()['weight'] != 0:
+        
+        if int(getStakingInfo()['weight']) != 0:
             timeToFind = convertFromSat(int(getStakingInfo()['netstakeweight'])) / convertFromSat(int(getStakingInfo()['weight'])) * 120
         else:
             timeToFind == 1
