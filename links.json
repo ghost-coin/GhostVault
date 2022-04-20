@@ -11,5 +11,13 @@
       "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.10/ghost-0.21.1.10-aarch64-linux-gnu.tar.gz",
       "hash": "6172dc56df7cea03e7ede71c3cb57e5c56634c5785c0f8e23cfc6ebe2b00275e"
   },
+  "x86_64-MacOS": {
+      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.10/ghost-0.21.1.10-osx64.tar.gz",
+      "hash": "910f38b22d0c1544a72d074795aeaf8e90e0b5cd3621ccb39a3917db3c74999f"
+  },
+  "x86_64-Windows": {
+      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.21.1.10/ghost-0.21.1.10-win64.zip",
+      "hash": "ba4fbb086047cd4d7d46fad340e6ec28ab88ace668daf384248a16a310ee1922"
+  },
   "version": "0.21.1.10"
 }

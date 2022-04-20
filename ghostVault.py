@@ -15,7 +15,9 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v0.9"
+version = "v1.1"
+
+system = platform.system()
 
 def rpcproxy():
     rpcproxy = AuthServiceProxy('http://%s:%s@127.0.0.1:%d/' % (RPCUSER, RPCPASSWORD, RPCPORT), timeout=120)
@@ -185,9 +187,9 @@ def createWallet(walletName):
 
 def loadWallet(walletName):
     if checkWalletLoad() == True:
-        wallet = rpcproxy.getwalletinfo()['walletname']
+        wallet = rpcproxy().getwalletinfo()['walletname']
         if wallet == walletName:
-            print("Wallet {walletName} already loaded.")
+            print(f"Wallet {walletName} already loaded.")
             return
         else:
             rpcproxy().loadwallet(walletName)
@@ -205,15 +207,20 @@ def isBadFork():
         return True
 
 def getSystem():
-    system = platform.system()
-    arch = platform.processor()
-    if arch == '':
-        if platform.uname()[-2] == 'armv7l':
-            arch = 'arm'
-        elif platform.uname()[-2] == 'aarch64':
-            arch = 'aarch64'
-        elif platform.uname()[-2] == 'x86_64':
-            arch = 'x86_64'
+    arch = platform.uname()[-2]
+
+    if arch == 'armv7l':
+        arch = 'arm'
+    elif arch == 'aarch64':
+        arch = 'aarch64'
+    elif arch == 'x86_64' or arch == 'AMD64':
+        arch = 'x86_64'
+    
+    if system == 'Darwin':
+        systemOS = 'MacOS'
+        arch = 'x86_64'
+        return f'{arch}-{systemOS}'
+    
     return f'{arch}-{system}'
 
 def syncProgress():
@@ -257,7 +264,6 @@ def convertToSat(value):
     return sat_readable
 
 def clear():
-    system = getSystem().split("-")[1]
     if system == "Windows":
         os.system('cls')
     else:
@@ -337,8 +343,12 @@ def extractDaemon():
         #time.sleep(5)
         #shutil.unpack_archive(archive, os.getcwd(), archiveFormat)
     for dirpath, dirnames, filenames in os.walk("."):
-        for filename in [f for f in filenames if f == "ghostd"]:
-            daemonPath = os.path.join(dirpath, filename)
+        if system == "Windows":
+            for filename in [f for f in filenames if f == "ghostd.exe"]:
+                daemonPath = os.path.join(dirpath, filename)
+        else:
+            for filename in [f for f in filenames if f == "ghostd"]:
+                daemonPath = os.path.join(dirpath, filename)
     dInfo = daemonInfo()
     dInfo['ghostdPath'] = daemonPath
     dInfo['ghostdHash'] = getDaemonHash(daemonPath)
@@ -382,7 +392,12 @@ def getHash(path):
     return readable_hash
 
 def prepareDataDir():
-    datadir = os.path.expanduser('~/.ghost/')
+    if system == 'Linux':
+        datadir = os.path.expanduser('~/.ghost/')
+    elif system == 'Darwin':
+        datadir = os.path.expanduser('~/Library/Application Support/Ghost/')
+    elif system == 'Windows':
+        datadir = os.path.expanduser('~/AppData/Roaming/Ghost/')
     
     if os.path.isdir(datadir):
         print('Data directory found...')
@@ -395,7 +410,12 @@ def prepareDataDir():
         shutil.copy('templates/ghost.conf', datadir)
 
 def clearBlocks():
-    datadir = os.path.expanduser('~/.ghost')
+    if system == 'Linux':
+        datadir = os.path.expanduser('~/.ghost')
+    elif system == 'Darwin':
+        datadir = os.path.expanduser('~/Library/Application Support/Ghost')
+    elif system == 'Windows':
+        datadir = os.path.expanduser('~/AppData/Roaming/Ghost')
     
     rmdir = ['blocks', 'chainstate']
     print("Clearing blocks...")
@@ -405,6 +425,21 @@ def clearBlocks():
     os.remove(f'{datadir}/banlist.dat')
     print('Blocks successfully cleared.')
 
+def createBatchFiles():
+    print('Preparing batch files...')
+        
+    batchFiles = [('vaultStart.bat', 'start'), ('vaultUpdate.bat', 'update'), ('vaultPay.bat', 'cronpay')]
+    
+    for i in batchFiles:
+        if os.path.isfile(f'{i[0]}'):
+            print(f"Batch file '{i[0]}' found. Skipping")
+        else:
+            print(f"Creating batch file '{i[0]}'...")
+            
+            with open(f"{i[0]}", "w") as f:
+                f.write(f'@echo off\npowershell -window hidden -command "cd {os.path.expanduser("~")}\\GhostVault\\ ; {shutil.which("python")} ghostVault.py {i[1]}\nexit"')
+            print("Success!")
+
 def updateDaemonInfo(dInfo):
     with open('daemon.json', 'r+') as f:
         f.seek(0)
@@ -413,15 +448,19 @@ def updateDaemonInfo(dInfo):
 
 def startDaemon():
     if os.path.isfile(daemonInfo()['ghostdPath']) == False:
-        showError(f"ghostd not found! run GhostVault with 'update' or 'quickstart' argument to install daemon.")
+        showError(f"ghostd not found! run GhostVault with 'forceupdate' or 'quickstart' argument to install daemon.")
     
     elif getDaemonHash(daemonInfo()['ghostdPath']) != daemonInfo()['ghostdHash']:
-        showError(f"Daemon hash not as expected! Daemon may be courupted.\nPlease run 'ghostVault.py update' to rectify.")
+        showError(f"Daemon hash not as expected! Daemon may be courupted.\nPlease run 'ghostVault.py forceupdate' to rectify.")
     
     elif checkConnect() == True:
         print("Daemon already running...")
     else:
-        subprocess.call([f"{daemonInfo()['ghostdPath']}"])
+        if system == "Windows":
+            print("Ghost Core starting")
+            subprocess.Popen(f"start cmd /C {daemonInfo()['ghostdPath']}", shell=True)
+        else:
+            subprocess.call([f"{daemonInfo()['ghostdPath']}", "-daemon"])
         waitForDaemon()
         try:
             loadWallet(daemonInfo()['walletName'])
@@ -445,7 +484,11 @@ def removeDaemon():
         return
     elif os.path.isfile(daemonInfo()['ghostdPath']) == False:
         return
-    daemonDir = f"{daemonInfo()['ghostdPath'].split('/')[1]}/"
+    if system == 'Windows':
+        daemonDir = daemonInfo()['ghostdPath'].split('\\')[1]
+    else:
+        daemonDir = f"{daemonInfo()['ghostdPath'].split('/')[1]}/"
+    
     stopDaemon()
     print('Removing deamon directory.')
     shutil.rmtree(daemonDir)
@@ -462,6 +505,9 @@ def removeArchive():
         os.remove(archive)
     else:
         print('Archive file not found.')
+    dInfo = daemonInfo()
+    dInfo['archive'] = ""
+    updateDaemonInfo(dInfo)
 
 def getStats(duration="all", days=None):
     tnow = time.time()
@@ -490,6 +536,35 @@ def getStats(duration="all", days=None):
             filter = rpcproxy().filtertransactions({"from":int(i[1]), "to":int(tnow),"count":100000,"category":"stake","collate":True,"include_watchonly":True,"with_reward":True})
 
             print(f"Last {i[0]:<9}        {Fore.GREEN}{filter['collated']['records']}                 {filter['collated']['total_reward']}{Style.RESET_ALL}")
+            
+        oneStake = rpcproxy().filtertransactions({"count":1,"category":"stake","include_watchonly":True})
+        
+        timeToFind = getStakingInfo()['expectedtime']
+        if timeToFind == 0:
+            timeToFind = 1
+        
+        if len(oneStake) != 0:
+            nextReward = timeToFind - (tnow - int(oneStake[0]['time']))
+        else:
+            nextReward = 0
+        
+        ghostPerDay = (day / timeToFind)
+        
+        print("\n")
+        print(f"Network stake weight   : {convertFromSat(int(getStakingInfo()['netstakeweight'])):,}")
+        print(f"Current stake weight   : {convertFromSat(int(getStakingInfo()['weight'])):,} | {round(convertFromSat(int(getStakingInfo()['weight'])) / convertFromSat(int(getStakingInfo()['netstakeweight']))*100, 2)}%")
+        
+        if timeToFind == 1:
+            pass
+        else:
+            print(f"EST Time to find       : {str(timedelta(seconds=timeToFind)).split('.')[0]}")
+        
+        if nextReward == 0:
+            pass
+        else:
+            print(f"EST Time to next reward: {str(timedelta(seconds=nextReward)).split('.')[0]}")
+        print(f"EST Stakes per day     : {round(ghostPerDay, 2)}")
+        print(f"EST Ghost per day      : {round(ghostPerDay*4.08, 8):,}")
 
 def quickstart():
     newWallet = True
@@ -592,7 +667,7 @@ def quickstart():
                     if walletIndex.isdigit() == False:
                         print(f"{Fore.RED}Invalid answer. Answer must be a number matching a wallet.{Style.RESET_ALL}")
                         
-                    elif len(walletIndex) > len(getWallets()):
+                    elif int(walletIndex) > len(getWallets()):
                         print(f"{Fore.RED}Invalid answer. Answer must be a number matching a wallet.{Style.RESET_ALL}")
                     else:
                         walletName = getWallets()[int(walletIndex)-1]
@@ -637,7 +712,7 @@ def quickstart():
                     if keyIndex.isdigit() == False:
                         print(f"{Fore.RED}Invalid answer. Answer must be a number matching a key.{Style.RESET_ALL}")
                         
-                    elif len(keyIndex) > len(getWallets()):
+                    elif int(keyIndex) > len(getWallets()):
                         print(f"{Fore.RED}Invalid answer. Answer must be a number matching a key.{Style.RESET_ALL}")
                     else:
                         extKey = keys[int(keyIndex)-1]['key']
@@ -693,40 +768,54 @@ def quickstart():
             else:
                 print("Invalid answer! Please enter either 'y' or 'n'")
                 input("Press Enter to continue...")
-    cronFound = False
-    cronBoot = False
-    cmd = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py update"
-    cmdBoot = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py start"
-    print("Setting up cron job")
-    cron = CronTab(user=True)
-    for job in cron:
-        if cmd in str(job):
-            print(f"Update cron found, skipping")
-            cronFound = True
-            
-        elif cmdBoot in str(job):
-            print(f"Start on boot cron found, skipping")
-            cronBoot = True
-            
-    if cronFound == False:
+    if system != 'Windows':
+        cronFound = False
+        cronBoot = False
+        cmd = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py update"
+        cmdBoot = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py start"
+        print("Setting up cron job...")
+        cron = CronTab(user=True)
+        for job in cron:
+            if cmd in str(job):
+                print(f"Update cron found, skipping")
+                cronFound = True
+                
+            elif cmdBoot in str(job):
+                print(f"Start on boot cron found, skipping")
+                cronBoot = True
+                
+        if cronFound == False:
+            try:
+                job3 = cron.new(command=cmd)
+                job3.minute.on(0)
+                job3.hour.every(2)
+                cron.write()
+                print("Update cron successfully set.\n")
+                
+            except Exception as e:
+                showError(e)
+        
+        if cronBoot == False:
+            try:
+                job4 = cron.new(command=cmdBoot)
+                job4.every_reboot()
+                cron.write()
+                print("Start on boot cron successfully set.\n")
+                
+            except Exception as e:
+                showError(e)
+    elif system == 'Windows':
+        createBatchFiles()
+        print(f"Setting up Windows Tasks...")
+        
         try:
-            job3 = cron.new(command=cmd)
-            job3.hour.every(2)
-            cron.write()
-            print("Update cron successfully set.\n")
-            
+            subprocess.call(f'{shutil.which("schtasks")} /create /sc hourly /mo 2 /tn "GhostVault Updater" /tr "{os.path.expanduser("~")}\\GhostVault\\vaultUpdate.bat"')
+            print(f"Update task successfully set.\n")
         except Exception as e:
             showError(e)
-    
-    if cronBoot == False:
-        try:
-            job4 = cron.new(command=cmdBoot)
-            job4.every_reboot()
-            cron.write()
-            print("Start on boot cron successfully set.\n")
-            
-        except Exception as e:
-            showError(e)
+        
+        shutil.copy('vaultStart.bat', f"{os.path.expanduser('~')}\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\")
+        print(f"Startup task successfully set.\n")
             
     print(f"Quick start success!")
     dInfo = daemonInfo()
@@ -761,6 +850,10 @@ def makeWallet():
     dInfo = daemonInfo()
     dInfo['walletName'] = walletName
     createWallet(walletName)
+    try:
+        loadWallet(walletName)
+    except:
+        pass
     updateDaemonInfo(dInfo)
     words = mnemonic()
     clear()
@@ -772,8 +865,10 @@ def makeWallet():
     importKey(words)   
 
 def getLoad():
-    load1, load5, load15 = os.getloadavg()
-    
+    if system == "Windows":
+        load1, load5, load15 = psutil.getloadavg()
+    else:
+        load1, load5, load15 = os.getloadavg()
     return [load1, load5, load15]
 
 def uptime():
@@ -801,7 +896,8 @@ def private():
         
         while True:
             
-            ans = input(f"Press Enter to quit or type '{Fore.CYAN}private{Style.RESET_ALL}' to continue with\nANON mode setup. ")
+            print(f"Press Enter to quit or type '{Fore.CYAN}private{Style.RESET_ALL}' to continue with")
+            ans = input(f"ANON mode setup. ")
             
             if ans == "private":
                 privateSetup()
@@ -842,21 +938,31 @@ def privateSetup():
 
     addr = getNewStealthAddr()
     setRewardAddress(addr, anon=True)
-    cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && /usr/bin/python3 ghostVault.py cronpay"
-    print("Setting up cron job")
-    cron = CronTab(user=True)
-    for job in cron:
-        if cmdPay in str(job):
-            print(f"cron job found, skipping")
-            cronPayFound = True
-            
-    if cronPayFound == False:
+    if system != 'Windows':
+        cmdPay = f"cd {os.path.expanduser('~/GhostVault/')} && {shutil.which('python3')} ghostVault.py cronpay"
+        print("Setting up cron job")
+        cron = CronTab(user=True)
+        for job in cron:
+            if cmdPay in str(job):
+                print(f"cron job found, skipping")
+                cronPayFound = True
+                
+        if cronPayFound == False:
+            try:
+                job3 = cron.new(command=cmdPay)
+                job3.minute.every(15)
+                cron.write()
+                print("Cron successfully set.\n")
+                
+            except Exception as e:
+                showError(e)
+    elif system == 'Windows':
+        createBatchFiles()
+        print(f"Creating Windows task...")
+        
         try:
-            job3 = cron.new(command=cmdPay)
-            job3.minute.every(15)
-            cron.write()
-            print("Cron successfully set.\n")
-            
+            subprocess.call(f'{shutil.which("schtasks")} /create /sc minute /mo 15 /tn "GhostVault Payment Processor" /tr "{os.path.expanduser("~")}\\GhostVault\\vaultPay.bat"')
+            print(f"Task successfully set.\n")
         except Exception as e:
             showError(e)
     
@@ -1090,7 +1196,7 @@ def makeRewardAddress():
         print(f"ANON mode is {Fore.GREEN}Active!{Style.RESET_ALL}\n\n")
         print(f"Continuing will disable ANON mode.")
         while True:
-            ans = input(f"Type '{Fore.CYAN}public{Style.RESET_ALL}' to continue or Enter to exit: ")
+            ans = input(f"Type {Fore.CYAN}public{Style.RESET_ALL} to continue or Enter to exit: ")
             
             if ans == 'public':
                 print(f"Continuing...")
@@ -1140,7 +1246,12 @@ def waitForDaemon():
 def waitForDaemonShutdown():
     print("Waiting for full daemon shutdown...")
     count = 0
-    pidFile = os.path.expanduser("~/.ghost/ghost.pid")
+    if system == 'Linux':
+        pidFile = os.path.expanduser('~/.ghost/ghost.pid')
+    elif system == 'Darwin':
+        pidFile = os.path.expanduser('~/Library/Application Support/Ghost/ghost.pid')
+    elif system == 'Windows':
+        pidFile = os.path.expanduser('~/AppData/Roaming/Ghost/ghost.pid')
     while True:
         
         if os.path.isfile(pidFile):
@@ -1176,6 +1287,7 @@ def help():
     print(f"{Fore.BLUE}checkchain{Style.RESET_ALL}        :  Checks that ghostd is on the correct chain.")
     print(f"{Fore.BLUE}forceresync{Style.RESET_ALL}       :  Forces ghostd to resync. Use in case of bad chain.")
     print(f"{Fore.BLUE}update{Style.RESET_ALL}            :  Self updater for GhostVault and ghostd.")
+    print(f"{Fore.BLUE}forceupdate{Style.RESET_ALL}       :  Downloads Ghostd even if update is not needed.")
     print(f"{Fore.BLUE}private{Style.RESET_ALL}           :  Checks privacy mode and initiates anon mode activation.")
     print(f"{Fore.BLUE}stats{Style.RESET_ALL}             :  Basic staking stats.")
     print(f"{Fore.BLUE}anonaddress{Style.RESET_ALL}       :  Shows the current payment address when in anon mode.")
@@ -1184,9 +1296,6 @@ def help():
     print(f"{Fore.BLUE}cronpay{Style.RESET_ALL}           :  Activates the payment processor. Used in a cron job.")
 
 def main():
-    if checkConnect == False:
-        print(f"Daemon not running, attempting to start")
-        startDaemon()
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower()
         if arg == "help":
@@ -1228,7 +1337,10 @@ def main():
                 print(f"Your extended public key is:\n\n{Fore.CYAN}{key}{Style.RESET_ALL}")
         
         elif arg == "update":
-            repo = git.Repo(os.path.expanduser("~/GhostVault"))
+            if system == "Windows":
+                repo = git.Repo(f"{os.path.expanduser('~')}\\GhostVault")
+            else:
+                repo = git.Repo(os.path.expanduser("~/GhostVault"))
             repo.remotes.origin.pull()
             
             print(f"Checking if ghostd is up to date...")
@@ -1296,7 +1408,18 @@ def main():
             print(f"GhostVault {version} balances.\n")
             
             for i in getBalances()['mine']:
-                print(f"{i}: {getBalances()['mine'][i]}") 
+                print(f"{i}: {getBalances()['mine'][i]}")
+                
+        elif arg == 'forceupdate':
+            print(f"Force updating Ghostd...")
+            stopDaemon()
+            waitForDaemonShutdown()
+            removeArchive()
+            removeDaemon()
+            downloadDaemon()
+            extractDaemon()
+            prepareDataDir()
+            startDaemon()
                 
         else:
             print(f"Unknown argument '{arg}'.\nPlease run '{Fore.CYAN}ghostVault.py help{Style.RESET_ALL}' for full list of commands.")
