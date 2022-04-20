@@ -562,7 +562,7 @@ def getStats(duration="all", days=None):
         if nextReward == 0:
             pass
         else:
-            print(f"EST Time to next reward: {str(timedelta(seconds=nextReward)).split('.')[0]}")
+            print(f"EST Time to next reward: {str(timedelta(seconds=nextReward)).split('.')[0]} | {nextReward / timeToFind*100}%")
         print(f"EST Stakes per day     : {round(ghostPerDay, 2)}")
         print(f"EST Ghost per day      : {round(ghostPerDay*4.08, 8):,}")
 
