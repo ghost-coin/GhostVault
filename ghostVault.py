@@ -547,8 +547,9 @@ def getStats(duration="all", days=None):
             nextReward = timeToFind - (tnow - int(oneStake[0]['time']))
         else:
             nextReward = 0
-        
-        percentToReward = ((tnow - int(oneStake[0]['time'])) / (int(oneStake[0]['time']) + int(timeToFind))) * 100
+        expectedTime = int(oneStake[0]['time']) + timeToFind
+        etime = tnow - int(oneStake[0]['time'])
+        percentToReward = etime / expectedTime * 100
         
         ghostPerDay = (day / timeToFind)
         
