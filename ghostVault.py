@@ -547,7 +547,7 @@ def getStats(duration="all", days=None):
             nextReward = timeToFind - (tnow - int(oneStake[0]['time']))
         else:
             nextReward = 0
-        expectedTime = int(oneStake[0]['time']) + timeToFind
+        expectedTime = timeToFind
         print(expectedTime)
         etime = tnow - int(oneStake[0]['time'])
         print(etime)
