@@ -540,19 +540,23 @@ def getStats(duration="all", days=None):
         oneStake = rpcproxy().filtertransactions({"count":1,"category":"stake","include_watchonly":True})
         
         timeToFind = getStakingInfo()['expectedtime']
+        
         if timeToFind == 0:
             timeToFind = 1
         
         if len(oneStake) != 0:
-            nextReward = timeToFind - (tnow - int(oneStake[0]['time']))
+            etime = tnow - int(oneStake[0]['time'])
+            nextReward = timeToFind - etime
         else:
+            etime = 1
             nextReward = 0
-        
-        ghostPerDay = (day / timeToFind)
+            
+        percentToReward = etime / timeToFind * 100
+        ghostPerDay = day / timeToFind
         
         print("\n")
         print(f"Network stake weight   : {convertFromSat(int(getStakingInfo()['netstakeweight'])):,}")
-        print(f"Current stake weight   : {convertFromSat(int(getStakingInfo()['weight'])):,} | {round(convertFromSat(int(getStakingInfo()['weight'])) / convertFromSat(int(getStakingInfo()['netstakeweight']))*100, 2)}%")
+        print(f"Current stake weight   : {getColdStakingInfo()['currently_staking']:,} | {round(float(getColdStakingInfo()['currently_staking']) / convertFromSat(int(getStakingInfo()['netstakeweight']))*100, 2)}%")
         
         if timeToFind == 1:
             pass
@@ -562,7 +566,10 @@ def getStats(duration="all", days=None):
         if nextReward == 0:
             pass
         else:
-            print(f"EST Time to next reward: {str(timedelta(seconds=nextReward)).split('.')[0]}")
+            if nextReward < 0:
+                print(f"EST % to next reward   : {round(percentToReward, 2)}%")
+            else:
+                print(f"EST Time to next reward: {str(timedelta(seconds=nextReward)).split('.')[0]} | {round(percentToReward, 2)}%")
         print(f"EST Stakes per day     : {round(ghostPerDay, 2)}")
         print(f"EST Ghost per day      : {round(ghostPerDay*4.08, 8):,}")
 
