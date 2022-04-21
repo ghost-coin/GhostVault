@@ -540,14 +540,15 @@ def getStats(duration="all", days=None):
         oneStake = rpcproxy().filtertransactions({"count":1,"category":"stake","include_watchonly":True})
         
         timeToFind = getStakingInfo()['expectedtime']
-        etime = tnow - int(oneStake[0]['time'])
         
         if timeToFind == 0:
             timeToFind = 1
         
         if len(oneStake) != 0:
+            etime = tnow - int(oneStake[0]['time'])
             nextReward = timeToFind - etime
         else:
+            etime = 1
             nextReward = 0
             
         percentToReward = etime / timeToFind * 100
@@ -566,7 +567,7 @@ def getStats(duration="all", days=None):
             pass
         else:
             if nextReward < 0:
-                print(f"EST Time to next reward: {round(percentToReward, 2)}%")
+                print(f"EST % to next reward   : {round(percentToReward, 2)}%")
             else:
                 print(f"EST Time to next reward: {str(timedelta(seconds=nextReward)).split('.')[0]} | {round(percentToReward, 2)}%")
         print(f"EST Stakes per day     : {round(ghostPerDay, 2)}")
