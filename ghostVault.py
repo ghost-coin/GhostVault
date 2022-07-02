@@ -571,7 +571,7 @@ def getStats(duration="all", days=None):
             else:
                 print(f"EST Time to next reward: {str(timedelta(seconds=nextReward)).split('.')[0]} | {round(percentToReward, 2)}%")
         print(f"EST Stakes per day     : {round(ghostPerDay, 2)}")
-        print(f"EST Ghost per day      : {round(ghostPerDay*4.08, 8):,}")
+        print(f"EST Ghost per day      : {round(ghostPerDay*3.876, 8):,}")
 
 def quickstart():
     newWallet = True
