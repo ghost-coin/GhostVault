@@ -15,7 +15,7 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v1.1"
+version = "v1.2"
 
 system = platform.system()
 
@@ -1291,6 +1291,7 @@ def help():
     print(f"{Fore.BLUE}rewardaddress{Style.RESET_ALL}     :  Returns current reward address.")
     print(f"{Fore.BLUE}setrewardaddress{Style.RESET_ALL}  :  Sets new reward address.")
     print(f"{Fore.BLUE}showextkey{Style.RESET_ALL}        :  Shows your extended public key.")
+    print(f"{Fore.BLUE}newextkey{Style.RESET_ALL}         :  Creates a new extended public key.")
     print(f"{Fore.BLUE}checkchain{Style.RESET_ALL}        :  Checks that ghostd is on the correct chain.")
     print(f"{Fore.BLUE}forceresync{Style.RESET_ALL}       :  Forces ghostd to resync. Use in case of bad chain.")
     print(f"{Fore.BLUE}update{Style.RESET_ALL}            :  Self updater for GhostVault and ghostd.")
@@ -1427,6 +1428,10 @@ def main():
             extractDaemon()
             prepareDataDir()
             startDaemon()
+        
+        elif arg == 'newextkey':
+            print(f"Getting new Extended Public Key...")
+            makeExtKey()
                 
         else:
             print(f"Unknown argument '{arg}'.\nPlease run '{Fore.CYAN}ghostVault.py help{Style.RESET_ALL}' for full list of commands.")
