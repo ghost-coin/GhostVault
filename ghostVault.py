@@ -839,6 +839,8 @@ def makeExtKey():
             break
     
     extKey = getNewExtAddr(keyLabel)
+    print(f"Deriving keys...")
+    rpcproxy().deriverangekeys(0, 999, extKey, False, True)
     dInfo = daemonInfo()
     dInfo['extPubKey'] = extKey
     dInfo['extPubKeyLabel'] = keyLabel
