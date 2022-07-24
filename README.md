@@ -193,6 +193,8 @@ python ghostVault.py <command>
 
 `showextkey`       : Shows the extended public key used to connect cold staking.
 
+`newextkey`        : Sets new extended public key.
+
 `private`          : Checks Anon mode and is used to activate anon mode.
 
 `update`           : Runs the self updater to update GhostVault and ghostd
