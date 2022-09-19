@@ -15,7 +15,7 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v1.2"
+version = "v1.2.1"
 
 system = platform.system()
 
@@ -840,7 +840,7 @@ def makeExtKey():
     
     extKey = getNewExtAddr(keyLabel)
     print(f"Deriving keys...")
-    rpcproxy().deriverangekeys(0, 999, extKey, False, True)
+    rpcproxy().deriverangekeys(0, 999, extKey, False, True, True)
     dInfo = daemonInfo()
     dInfo['extPubKey'] = extKey
     dInfo['extPubKeyLabel'] = keyLabel
