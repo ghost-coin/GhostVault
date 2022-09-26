@@ -15,7 +15,7 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v1.2.1"
+version = "v1.3"
 
 system = platform.system()
 
@@ -1406,6 +1406,7 @@ def main():
             if "txindex=1\n" in lines:
                 print(f'txindex found, electrumx mode enabled.')
             else:
+                print(f'txindex  not found, activating electrumx mode..')
                 with open(os.path.join(datadir, "ghost.conf"), 'a') as f:
                     f.write(f"txindex=1\n")
                 print("Resyncing with the Ghost network...")
