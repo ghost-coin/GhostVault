@@ -207,4 +207,6 @@ python ghostVault.py <command>
 
 `balance`          : Shows the internal wallet balances
 
+`enableelectrumx`  : Enables txindex=1 in config for use with electrumx server.
+
 `cronpay`          : Used by cron to process payments for Anon mode.

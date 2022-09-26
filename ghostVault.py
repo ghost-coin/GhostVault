@@ -15,7 +15,7 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v1.2.1"
+version = "v1.3"
 
 system = platform.system()
 
@@ -1303,6 +1303,7 @@ def help():
     print(f"{Fore.BLUE}anonaddress{Style.RESET_ALL}       :  Shows the current payment address when in anon mode.")
     print(f"{Fore.BLUE}setanonaddress{Style.RESET_ALL}    :  Sets new payment address when in anon mode.")
     print(f"{Fore.BLUE}balance{Style.RESET_ALL}           :  Shows internal wallet balances.")
+    print(f"{Fore.BLUE}enableelectrumx{Style.RESET_ALL}   :  Enables txindex=1 in config for use with electrumx server.")
     print(f"{Fore.BLUE}cronpay{Style.RESET_ALL}           :  Activates the payment processor. Used in a cron job.")
 
 def main():
@@ -1389,6 +1390,36 @@ def main():
             if isBadFork() == True:
                 showError(f"Bad fork detected. Please run 'ghostVault.py forceresync' to force a resync.")
             print(f"Daemon is now synced with the Ghost network")
+
+        elif arg == "enableelectrumx":
+            print(f'Checking for txindex...')
+            if system == 'Linux':
+                datadir = os.path.expanduser('~/.ghost/')
+            elif system == 'Darwin':
+                datadir = os.path.expanduser('~/Library/Application Support/Ghost/')
+            elif system == 'Windows':
+                datadir = os.path.expanduser('~/AppData/Roaming/Ghost/')
+
+            with open(os.path.join(datadir, "ghost.conf")) as f:
+                lines = f.readlines()
+
+            if "txindex=1\n" in lines:
+                print(f'txindex found, electrumx mode enabled.')
+            else:
+                print(f'txindex  not found, activating electrumx mode..')
+                with open(os.path.join(datadir, "ghost.conf"), 'a') as f:
+                    f.write(f"txindex=1\n")
+                print("Resyncing with the Ghost network...")
+                stopDaemon()
+                clearBlocks()
+                time.sleep(5)
+                startDaemon()
+                if isSyncing() == True:
+                    syncProgress()
+
+                if isBadFork() == True:
+                    showError(f"Bad fork detected. Please run 'ghostVault.py forceresync' to force a resync.")
+                print(f"Daemon is now synced with the Ghost network")
         
         elif arg == "status":
             status()
@@ -1428,7 +1459,6 @@ def main():
             removeDaemon()
             downloadDaemon()
             extractDaemon()
-            prepareDataDir()
             startDaemon()
         
         elif arg == 'newextkey':
