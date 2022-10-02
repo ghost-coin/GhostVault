@@ -15,7 +15,7 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v1.3"
+version = "v1.3.1"
 
 system = platform.system()
 
