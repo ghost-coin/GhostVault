@@ -1,23 +1,23 @@
 {
   "x86_64-Linux": {
-    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.1.0/ghost-0.22.1.0-x86_64-pc-linux-gnu.tar.gz",
-    "hash": "63127cc8657e309f36efc736269433bd3d0a0e1e35e052d2a6efec729767c229"
+    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.2.0/ghost-0.22.2.0-x86_64-pc-linux-gnu.tar.gz",
+    "hash": "0eff403c0cc9605df5121997f000e4c9337e079d0278b7fd2dd0035c66580124"
   },
   "arm-Linux": {
-    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.1.0/ghost-0.22.1.0-arm-linux-gnueabihf.tar.gz",
-    "hash": "489a3dbacff7a48daed4c8c8ea9eca0b65dc559a8da93c944e7ef01cc4ba2aa0"
+    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.2.0/ghost-0.22.2.0-arm-linux-gnueabihf.tar.gz",
+    "hash": "a5b864d4c658f54fd9e186a1aff757e2f93899e55225a9054bb84bd811d75b8b"
   },
   "aarch64-Linux": {
-      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.1.0/ghost-0.22.1.0-aarch64-linux-gnu.tar.gz",
-      "hash": "1dfcd80e5887276c638ee3126e6022238d01801ea570178bc3cb72c0754b4ca2"
+      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.2.0/ghost-0.22.2.0-aarch64-linux-gnu.tar.gz",
+      "hash": "d6218b627c9fc9997e099c670f2d7a54b367685cea399c7b26b48ad8873a8a1a"
   },
   "x86_64-MacOS": {
-      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.1.0/ghost-0.22.1.0-osx64.tar.gz",
-      "hash": "0b98a24f8db9330e6830d3637d9ec222802a564197af8ff9a8461cb05c8948fb"
+      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.2.0/ghost-0.22.2.0-MacOS64.tar.gz",
+      "hash": "f5e2a1043448943420d2475a026a779af6eb5c5b14133dc12258329cf0d3ac52"
   },
   "x86_64-Windows": {
-      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.1.0/ghost-0.22.1.0-win64.zip",
-      "hash": "c82bb01ded168e58a12ee62e4cb1dbafaf268042d99655129734e300e27ba7e4"
+      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.2.0/ghost-0.22.2.0-win64.zip",
+      "hash": "759a74907e86f115ab1c6ac0cc903c21ab94dc3243a0c43c4a3670b5c7c7871d"
   },
-  "version": "0.22.1.0"
+  "version": "0.22.2.0"
 }
