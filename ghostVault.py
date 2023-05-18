@@ -15,7 +15,7 @@ RPCUSER = 'user'
 RPCPASSWORD = 'password'
 RPCPORT = 51725
 
-version = "v1.3.1"
+version = "v1.3.2"
 
 system = platform.system()
 
@@ -1368,7 +1368,6 @@ def main():
                 removeDaemon()
                 downloadDaemon()
                 extractDaemon()
-                prepareDataDir()
                 startDaemon()
                 
         elif arg == "checkchain":
