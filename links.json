@@ -1,23 +1,23 @@
 {
   "x86_64-Linux": {
-    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.2.0/ghost-0.22.2.0-x86_64-pc-linux-gnu.tar.gz",
-    "hash": "0eff403c0cc9605df5121997f000e4c9337e079d0278b7fd2dd0035c66580124"
+    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.23.0.0/ghost-0.23.0.0-x86_64-pc-linux-gnu.tar.gz",
+    "hash": "63dad84844a9692bf7bbead70bb57279e8b85a161bf3b98f8415301cadb8f36e"
   },
   "arm-Linux": {
-    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.2.0/ghost-0.22.2.0-arm-linux-gnueabihf.tar.gz",
-    "hash": "a5b864d4c658f54fd9e186a1aff757e2f93899e55225a9054bb84bd811d75b8b"
+    "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.23.0.0/ghost-0.23.0.0-arm-linux-gnueabihf.tar.gz",
+    "hash": "6b661a46d3c5e93156bc4ef92e46384c3d9b5192144d50aa62956c45ee3901c9"
   },
   "aarch64-Linux": {
-      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.2.0/ghost-0.22.2.0-aarch64-linux-gnu.tar.gz",
-      "hash": "d6218b627c9fc9997e099c670f2d7a54b367685cea399c7b26b48ad8873a8a1a"
+      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.23.0.0/ghost-0.23.0.0-aarch64-linux-gnu.tar.gz",
+      "hash": "f731a30f003227a85abea72ba942e73ae376b2bdd05f466df5db8abb475e9750"
   },
   "x86_64-MacOS": {
-      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.2.0/ghost-0.22.2.0-MacOS64.tar.gz",
-      "hash": "f5e2a1043448943420d2475a026a779af6eb5c5b14133dc12258329cf0d3ac52"
+      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.23.0.0/ghost-0.23.0.0-MacOS64.tar.gz",
+      "hash": "ada35be6582faf4516eeff1467bf11a56533eb9a786107e19a41b821b89bd588"
   },
   "x86_64-Windows": {
-      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.22.2.0/ghost-0.22.2.0-win64.zip",
-      "hash": "759a74907e86f115ab1c6ac0cc903c21ab94dc3243a0c43c4a3670b5c7c7871d"
+      "link": "https://github.com/ghost-coin/ghost-core/releases/download/v0.23.0.0/ghost-0.23.0.0-win64.zip",
+      "hash": "0007877bad86d4800cdf0fa5f571a1d234f2583961901e83bfdd8a6f633cb9ba"
   },
-  "version": "0.22.2.0"
+  "version": "0.23.0.0"
 }
